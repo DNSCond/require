@@ -5,6 +5,7 @@ use function Helpers\htmlspecialchars12;
 use function Helpers\json_fromArray;
 
 require_once __DIR__ . "/Color.php";
+require_once __DIR__ . "/helpers.php";
 
 function create_head2(string $title, array $user_options, ?array $links = null, ?array $navOptions = null): array
 {
@@ -100,33 +101,33 @@ function getFrom(array $array, string|int $property, mixed $default = null): mix
 
 function ANTNavHome(bool $selected = false): ANTNavOption
 {
-    return new ANTNavOption('https://antrequest.com', '/dollmaker1/endpoint.php?bgcolor=%2300a8f3&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%23ff0000&RC=%230000ff&v=1',
+    return new ANTNavOption('https://antrequest.com', '/dollmaker2/icon/endpoint.php?bgcolor=%2300a8f3&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%23ff0000&RC=%230000ff&v=1',
         'Home', new Color('#0073a6'),
         new Color('#00a8f3'), $selected);
 }
 
 function ANTNavFavicond(string $linkTo, string $altText, bool $selected = false): ANTNavOption
 {
-    return new ANTNavOption("$linkTo", '/dollmaker1/endpoint.php?bgcolor=%2300a8f3&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%23ff0000&RC=%230000ff&v=1',
+    return new ANTNavOption("$linkTo", '/dollmaker2/icon/endpoint.php?bgcolor=%2300a8f3&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%23ff0000&RC=%230000ff&v=1',
         "$altText", new Color('#0073a6'),
         new Color('#00a8f3'), $selected);
 }
 
 function ANTNavReddcond(string $linkTo, string $altText, bool $selected = false): ANTNavOption
 {
-    return new ANTNavOption("$linkTo", '/dollmaker1/endpoint.php?preset=Reddcat', "$altText",
+    return new ANTNavOption("$linkTo", '/dollmaker2/icon/endpoint.php?preset=Reddcat', "$altText",
         new Color('a62c00'), new Color('ff4500'), $selected);
 }
 
 function ANTNavBuzz(string $linkTo, string $altText, bool $selected = false): ANTNavOption
 {
-    return new ANTNavOption("$linkTo", '/dollmaker1/endpoint.php?bgcolor=%23fff100&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%2300a8f3&RC=%23ff4500&accessory=mouth+Left_Light+RightLight+Middle+stripes',
+    return new ANTNavOption("$linkTo", '/dollmaker2/icon/endpoint.php?bgcolor=%23fff100&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%2300a8f3&RC=%23ff4500&accessory=mouth+Left_Light+RightLight+Middle+stripes',
         "$altText", new Color('a68300'), new Color('fff100'), $selected);
 }
 
 function ANTNavBinary(string $linkTo, string $altText, bool $selected = false): ANTNavOption
 {
-    return new ANTNavOption("$linkTo", '/dollmaker1/endpoint.php?preset=Binary', "$altText",
+    return new ANTNavOption("$linkTo", '/dollmaker2/icon/endpoint.php?preset=Binary', "$altText",
         new Color('00a600'), new Color('00ff00'), $selected);
 }
 
@@ -142,7 +143,7 @@ class ANTNavOption
      * creates an navigation option
      *
      * @param string $linkTo where it links to
-     * @param string $imageTo /dollmaker1/ image url
+     * @param string $imageTo /dollmaker2/icon/ image url
      * @param string $altText the image's alt text
      * @param Color|string $bgColor the color of the background
      * @param Color|string $borderColor the color of the borders
