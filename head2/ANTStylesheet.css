@@ -1,0 +1,72 @@
+:root {
+    --primaryColor: #00a8f3;
+    --secondaryColor: #0073a6;
+    --textColor: black;
+    --backColor: white;
+}
+
+a:visited, a:link {
+    color: blue;
+}
+
+a:hover {
+    color: orangered;
+}
+
+a:active {
+    color: black;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primaryColor: #36393f;
+        --secondaryColor: #36393f;
+        --textColor: #ffffff;
+        --backColor: #171717;
+    }
+
+    a:visited, a:link {
+        color: #94DDFF;
+    }
+
+    a:hover {
+        color: orangered;
+    }
+
+    a:active {
+        color: white;
+    }
+}
+
+:root {
+    --borderColor: var(--primaryColor);
+    --bgColor: var(--secondaryColor)
+}
+
+body {
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bgColor);
+}
+
+/*nav.main.nav-home {border-bottom-color: var(--borderColor);}*/
+
+.divs {
+    margin: 1em auto auto;
+    color: var(--textColor);
+    background-color: var(--backColor);
+    box-sizing: border-box;
+    padding: 0.7em;
+    width: 88%;
+
+    > h1:first-child, > h2:first-child, > h3:first-child, > h4:first-child, > h5:first-child, > h6:first-child {
+        margin-top: 0;
+    }
+}
+
+button, input, textarea, html {
+    font-family: monospace;
+}
