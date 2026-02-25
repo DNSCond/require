@@ -3,13 +3,13 @@ use function ANTHeader\ANTNavFavicond;
 use function ANTHeader\create_head2;
 
 require_once "{$_SERVER['DOCUMENT_ROOT']}/require/createHead2.php";
-$http_RedirectStatus = array_key_exists('REDIRECT_STATUS', $_SERVER) ? "{$_SERVER["REDIRECT_STATUS"]}" : '';
+$http_RedirectStatus = (int)(array_key_exists('REDIRECT_STATUS', $_SERVER) ? "{$_SERVER["REDIRECT_STATUS"]}" : '');
 function http_RedirectStatus(int $status, string $h1, string $p): array
 {
     return [$status, $h1, $p];
 }
 
-[$_, $title, $message] = match ((int)$http_RedirectStatus) {
+[$_, $title, $message] = match ($http_RedirectStatus) {
     404 => http_RedirectStatus(404, '404 NotFound!', 'your REQUEST could not be Found at ANTRequest.nl are you sure you entered the address correctly?'),
     403 => http_RedirectStatus(403, '403 Forbidden!', 'Forbidden (meaning you are not allowed to do this)'),
     400 => http_RedirectStatus(400, '400 BadRequest!', 'BadRequest!'),
