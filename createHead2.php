@@ -282,14 +282,14 @@ readonly class ANTNavIScript
 
 readonly class ANTNavScript
 {
-    public function __construct(private string $link)
+    public function __construct(private string $link, private bool $module=false)
     {
     }
 
     public function toString(): string
     {
-
-        return "<script src=\"$this->link\"></script>";
+        $module = ($this->module ? 'type=module' : 'data-type=module');
+        return "<script src=\"$this->link\" $module></script>";
     }
 
     public function __toString(): string
