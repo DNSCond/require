@@ -73,7 +73,7 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
         foreach ($links as $link) {
             if (!($link instanceof ANTNavLinkTag || $link instanceof ANTNavScript
                 || $link instanceof ANTNavIStyle || $link instanceof ANTNavIScript
-                || $link instanceof ANTNavMetaTag)) {
+                || $link instanceof ANTNavMetaTag || $link instanceof ANTNavArbitraryHTML)) {
                 throw new \TypeError("Links Must be 'ANTNavLink's or 'ANTNavIStyle's");
             }
             echo $link->toString();
@@ -290,6 +290,23 @@ readonly class ANTNavScript
     {
         $module = ($this->module ? 'type=module' : 'data-type=module');
         return "<script src=\"$this->link\" $module></script>";
+    }
+
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+}
+
+readonly class ANTNavArbitraryHTML
+{
+    public function __construct(private string $tagNameComment, private string $html)
+    {
+    }
+
+    public function toString(): string
+    {
+        return "<!-- $this->tagNameComment -->$this->html<!-- /$this->tagNameComment -->";
     }
 
     public function __toString(): string
