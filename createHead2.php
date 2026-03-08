@@ -10,8 +10,8 @@ require_once __DIR__ . "/helpers.php";
 function create_head2(string $title, array $user_options, ?array $links = null, ?array $navOptions = null): array
 {
     $options = [
+        'base' => getFrom($user_options, 'base'),
         'lang' => getFrom($user_options, 'lang', 'en'),
-        'base' => getFrom($user_options, 'base', '/'),
         'v' => getFrom($user_options, 'moduleVersion', '2'),
         'desc' => getFrom($user_options, 'desc'),
         'hiddenTopBar' => getFrom($user_options, 'hiddenTopBar', false) ? ' hidden' : '',
@@ -35,7 +35,7 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
         array_unshift($links, new ANTNavMetaTag('description', $options['desc']));
     }
     echo "<!DOCTYPE html><html lang=\"{$options['lang']}\"><meta charset=UTF-8><title>$title</title>$base\n";
-    echo "\n";
+    echo "<script type=importmap>$importmap</script>\n\n";
 
     $nav = [];
     $bgColor = '#0073a6';
@@ -84,8 +84,8 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     echo "\n\n";
     /** @noinspection JSUnresolvedLibraryURL */
     echo "<script src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js></script>\n";
-    echo "<script src=/require/head2/domContentLoadedPromise.js></script>\n<script type=importmap>$importmap"
-        . "</script>$n<script type=module src=/require/head2/import-v{$options['v']}.js></script>";
+    echo "<script src=/require/head2/domContentLoadedPromise.js></script>"
+        . "$n<script type=module src=/require/head2/import-v{$options['v']}.js></script>";
     echo "</head><body>\n<nav style=\"color:$naviGatorBarColor;background-color:currentColor;box-sizing:content-box;height:" .
         "calc(4.4em + 4px);border-bottom: 4px solid $oldBorderColor\"{$options['hiddenTopBar']}><div style=\"display:flex;"
         . "flex-wrap:nowrap;align-items:center;flex-direction:row;height:100%;position:relative;margin:auto;width:88%;"
@@ -282,7 +282,7 @@ readonly class ANTNavIScript
 
 readonly class ANTNavScript
 {
-    public function __construct(private string $link, private bool $module=false)
+    public function __construct(private string $link, private bool $module = false)
     {
     }
 
