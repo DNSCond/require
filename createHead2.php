@@ -1,6 +1,7 @@
 <?php namespace ANTHeader;
 
 use Color;
+use ContentSecurityPolicy\ContentSecurityPolicy;
 use function Helpers\htmlspecialchars12;
 use function Helpers\json_fromArray;
 
@@ -15,8 +16,29 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
         'v' => getFrom($user_options, 'moduleVersion', '2'),
         'desc' => getFrom($user_options, 'desc'),
         'hiddenTopBar' => getFrom($user_options, 'hiddenTopBar', false) ? ' hidden' : '',
+        'defaultCSP' => getFrom($user_options, 'defaultCSP', true),
+        'csp' => getFrom($user_options, 'csp'),
     ];
-    ob_start(function (string $string): string {
+    ob_start(function (string $string) use ($options): string {
+        if ($options['defaultCSP']) {
+            header("Content-Security-Policy: default-src 'self'; img-src 'self' blob:; script-src 'self' 'unsafe-inline'" .
+                " https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js; style-src 'self' 'unsafe-inline'; object-src" .
+                " 'none'; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none';");
+            header("Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob:; script-src 'self' " .
+                "sha384-df2iQaZF4qu/OgVkNSZQqLfqm4saLMMEaHCH8tzdu0JcIZ4VR3Y22rvlq6W1HOjX; style-src 'self'; object-src 'none';" .
+                " frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none'; form-action 'self'");
+        } elseif ($options['csp'] instanceof ContentSecurityPolicy || is_array($options['csp'])) {
+            if ($options['csp'] instanceof ContentSecurityPolicy) $options['csp']->send(); else {
+                foreach ($options['csp'] as $csp) $csp->send();
+            }
+        }
+        header("FX-HashApi-Content-Hash: " .
+            'sha256-' . sha256Base64($string) . ",\x20" .
+            'sha384-' . sha384Base64($string) . ",\x20" .
+            'sha512-' . sha512Base64($string) . ",\x20" .
+            'md5-' . base64_encode(md5($string, true)) . ",\x20" .
+            'sha1-' . base64_encode(sha1($string, true))
+        );
         return "$string<div style=height:32vh></div>\n";
     });
     $title = htmlspecialchars12("$title (ANTRequest.nl)");
@@ -28,9 +50,7 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
             "temporal-polyfill" => "/require/head2/temporal.js",
         ),
     ], false);
-    array_unshift($links, new ANTNavMetaTag(
-            'viewport', 'width=device-width, initial-scale=1')
-    );
+    array_unshift($links, new ANTNavMetaTag('viewport', 'width=device-width,initial-scale=1'));
     if (!empty($options['desc'])) {
         array_unshift($links, new ANTNavMetaTag('description', $options['desc']));
     }
@@ -83,8 +103,8 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     $n = "\n";
     echo "\n\n";
     /** @noinspection JSUnresolvedLibraryURL */
-    echo "<script src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js></script>\n";
-    echo "<script src=/require/head2/domContentLoadedPromise.js></script>"
+    echo "<script crossorigin=anonymous src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js";
+    echo "></script>\n<script src=/require/head2/domContentLoadedPromise.js></script>"
         . "$n<script type=module src=/require/head2/import-v{$options['v']}.js></script>";
     echo "</head><body>\n<nav style=\"color:$naviGatorBarColor;background-color:currentColor;box-sizing:content-box;height:" .
         "calc(4.4em + 4px);border-bottom: 4px solid $oldBorderColor\"{$options['hiddenTopBar']}><div style=\"display:flex;"
@@ -121,7 +141,8 @@ function ANTNavReddcond(string $linkTo, string $altText, bool $selected = false)
 
 function ANTNavBuzz(string $linkTo, string $altText, bool $selected = false): ANTNavOption
 {
-    return new ANTNavOption("$linkTo", '/dollmaker2/icon/endpoint.php?bgcolor=%23fff100&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%2300a8f3&RC=%23ff4500&accessory=mouth+Left_Light+RightLight+Middle+stripes',
+    return new ANTNavOption("$linkTo", '/dollmaker2/icon/endpoint.php?bgcolor=%23fff100&fgcolor=%238cfffa' .
+        '&L=%23fff200&W=%23000000&LC=%2300a8f3&RC=%23ff4500&accessory=mouth+Left_Light+RightLight+Middle+stripes',
         "$altText", new Color('a68300'), new Color('fff100'), $selected);
 }
 
@@ -318,4 +339,14 @@ readonly class ANTNavArbitraryHTML
 function sha256Base64(string $string): string
 {
     return base64_encode(hash('sha256', $string, true));
+}
+
+function sha384Base64(string $string): string
+{
+    return base64_encode(hash('sha384', $string, true));
+}
+
+function sha512Base64(string $string): string
+{
+    return base64_encode(hash('sha512', $string, true));
 }
