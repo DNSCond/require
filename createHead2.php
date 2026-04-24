@@ -336,40 +336,54 @@ readonly class ANTNavArbitraryHTML
     }
 }
 
+require_once __DIR__ . '/HashApi.php';
+
+/**
+ * @param string $string
+ * @return string
+ * @deprecated
+ */
 function sha256Base64(string $string): string
 {
-    return base64_encode(hash('sha256', $string, true));
+    return \HashApi\sha256Base64($string);
 }
 
+/**
+ * @param string $string
+ * @return string
+ * @deprecated
+ */
 function sha384Base64(string $string): string
 {
-    return base64_encode(hash('sha384', $string, true));
+    return \HashApi\sha384Base64($string);
 }
 
+/**
+ * @param string $string
+ * @return string
+ * @deprecated
+ */
 function sha512Base64(string $string): string
 {
-    return base64_encode(hash('sha512', $string, true));
+    return \HashApi\sha512Base64($string);
 }
 
+/**
+ * @return string
+ * @deprecated
+ */
 function nonceBase64(): string
 {
-    try {
-        return 'nonce-' . base64_encode(random_bytes(16));
-    } catch (RandomException) {
-        return 'null';
-    }
+    return \HashApi\nonceBase64();
 }
 
+/**
+ * @param string $string
+ * @param bool $override
+ * @return void
+ * @deprecated
+ */
 function sendHashApi(string $string, bool $override = false): void
 {
-    header('vary: User-Agent', false);
-    if ($override || ($_SERVER['HTTP_USER_AGENT'] === 'FaviEdge/25.5.19')) {
-        header("FX-HashApi-Nonce: " . nonceBase64());
-        header("FX-HashApi-CHash: " .
-            'sha256-' . sha256Base64($string) . ",\x20" .
-            'sha384-' . sha384Base64($string) . ",\x20" .
-            'sha512-' . sha512Base64($string) . ",\x20" .
-            'sha1-' . base64_encode(sha1($string, true)));
-        header("FX-HashApi-DateTime: " . gmdate("D, d M Y H:i:s \\G\\M\\T", $_SERVER['REQUEST_TIME']));
-    }
+    \HashApi\sendHashApi($string, $override);
 }
