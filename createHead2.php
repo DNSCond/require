@@ -2,6 +2,7 @@
 
 use Color;
 use ContentSecurityPolicy\ContentSecurityPolicy;
+use Random\RandomException;
 use function Helpers\htmlspecialchars12;
 use function Helpers\json_fromArray;
 
@@ -32,13 +33,12 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
                 foreach ($options['csp'] as $csp) $csp->send();
             }
         }
-        header("FX-HashApi-Content-Hash: " .
-            'sha256-' . sha256Base64($string) . ",\x20" .
-            'sha384-' . sha384Base64($string) . ",\x20" .
-            'sha512-' . sha512Base64($string) . ",\x20" .
-            'md5-' . base64_encode(md5($string, true)) . ",\x20" .
-            'sha1-' . base64_encode(sha1($string, true))
-        );
+        sendHashApi($string);
+        //$headers = array();foreach (headers_list() as $item) {
+        //if (preg_match('/^([^:]+):\\s*(.*)$/D', $item, $matches)) {
+        //if (preg_match('/^(X-Powered-By)$/iD', $matches[1])) continue;
+        //$headers[] = "data-headerset-$matches[1]=\"" . htmlspecialchars12($matches[2]) . "\"";
+        //}}$string = str_replace('data-bodyheaderset', implode("\x20", $headers), $string);
         return "$string<div style=height:32vh></div>\n";
     });
     $title = htmlspecialchars12("$title (ANTRequest.nl)");
@@ -104,13 +104,13 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     echo "\n\n";
     /** @noinspection JSUnresolvedLibraryURL */
     echo "<script crossorigin=anonymous src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js";
-    echo "></script>\n<script src=/require/head2/domContentLoadedPromise.js></script>"
-        . "$n<script type=module src=/require/head2/import-v{$options['v']}.js></script>";
-    echo "</head><body>\n<nav style=\"color:$naviGatorBarColor;background-color:currentColor;box-sizing:content-box;height:" .
+    echo "></script>\n<script src=/require/head2/domContentLoadedPromise.js></script>$n<script"
+        . " type=module src=/require/head2/import-v{$options['v']}.js></script></head><body data-bodyheaderset>" .
+        "\n<nav style=\"color:$naviGatorBarColor;background-color:currentColor;box-sizing:content-box;height:" .
         "calc(4.4em + 4px);border-bottom: 4px solid $oldBorderColor\"{$options['hiddenTopBar']}><div style=\"display:flex;"
         . "flex-wrap:nowrap;align-items:center;flex-direction:row;height:100%;position:relative;margin:auto;width:88%;"
         . "box-sizing:border-box;overflow:auto hidden\">$n" . implode("$n", $nav) . "$n</div></nav>";
-    echo "\n\n<!-- webpage-->\n\n";//require/head2/import.json
+    echo "\n\n<!-- webpage-->\n\n";
     return array();
 }
 
@@ -349,4 +349,27 @@ function sha384Base64(string $string): string
 function sha512Base64(string $string): string
 {
     return base64_encode(hash('sha512', $string, true));
+}
+
+function nonceBase64(): string
+{
+    try {
+        return 'nonce-' . base64_encode(random_bytes(16));
+    } catch (RandomException) {
+        return 'null';
+    }
+}
+
+function sendHashApi(string $string, bool $override = false): void
+{
+    header('vary: User-Agent', false);
+    if ($override || ($_SERVER['HTTP_USER_AGENT'] === 'FaviEdge/25.5.19')) {
+        header("FX-HashApi-Nonce: " . nonceBase64());
+        header("FX-HashApi-CHash: " .
+            'sha256-' . sha256Base64($string) . ",\x20" .
+            'sha384-' . sha384Base64($string) . ",\x20" .
+            'sha512-' . sha512Base64($string) . ",\x20" .
+            'sha1-' . base64_encode(sha1($string, true)));
+        header("FX-HashApi-DateTime: " . gmdate("D, d M Y H:i:s \\G\\M\\T", $_SERVER['REQUEST_TIME']));
+    }
 }
