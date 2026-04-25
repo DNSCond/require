@@ -17,10 +17,10 @@ function sha512Base64(string $string): string
     return base64_encode(hash('sha512', $string, true));
 }
 
-function nonceBase64(): string
+function nonceBase64(int $length = 16): string
 {
     try {
-        return 'nonce-' . base64_encode(random_bytes(16));
+        return 'nonce-' . base64_encode(random_bytes($length));
     } catch (RandomException) {
         return 'null';
     }
