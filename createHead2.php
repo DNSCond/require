@@ -25,15 +25,16 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
             header("Content-Security-Policy: default-src 'self'; img-src 'self' blob:; script-src 'self' 'unsafe-inline'" .
                 " https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js; style-src 'self' 'unsafe-inline'; object-src" .
                 " 'none'; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none';");
-            header("Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob:; script-src 'self' " .
-                "sha384-df2iQaZF4qu/OgVkNSZQqLfqm4saLMMEaHCH8tzdu0JcIZ4VR3Y22rvlq6W1HOjX; style-src 'self'; object-src 'none';" .
-                " frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none'; form-action 'self'");
+            //header("Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob:; script-src 'self' " .
+            //    "'sha384-df2iQaZF4qu/OgVkNSZQqLfqm4saLMMEaHCH8tzdu0JcIZ4VR3Y22rvlq6W1HOjX'; style-src 'self'; object-src 'none';" .
+            //    " frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none'; form-action 'self'");
         } elseif ($options['csp'] instanceof ContentSecurityPolicy || is_array($options['csp'])) {
             if ($options['csp'] instanceof ContentSecurityPolicy) $options['csp']->send(); else {
                 foreach ($options['csp'] as $csp) $csp->send();
             }
         }
-        sendHashApi($string);
+        header('vary: User-Agent', false);
+        \HashApi\sendHashApi($string);
         //$headers = array();foreach (headers_list() as $item) {
         //if (preg_match('/^([^:]+):\\s*(.*)$/D', $item, $matches)) {
         //if (preg_match('/^(X-Powered-By)$/iD', $matches[1])) continue;
@@ -103,7 +104,8 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     $n = "\n";
     echo "\n\n";
     /** @noinspection JSUnresolvedLibraryURL */
-    echo "<script crossorigin=anonymous src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js";
+    echo "<script integrity='sha512-4V50NWjNLKBH60KkunQBWbMwv4pA5NIstr1F2Ossnb691knDWKYaHpGvS1bEyIupZnUnToVz5UQSZM/HIlj/tQ==' ".
+        "crossorigin=anonymous src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js";
     echo "></script>\n<script src=/require/head2/domContentLoadedPromise.js></script>$n<script"
         . " type=module src=/require/head2/import-v{$options['v']}.js></script></head><body data-bodyheaderset>" .
         "\n<nav style=\"color:$naviGatorBarColor;background-color:currentColor;box-sizing:content-box;height:" .
