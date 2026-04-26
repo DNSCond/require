@@ -25,9 +25,9 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
             header("Content-Security-Policy: default-src 'self'; img-src 'self' blob:; script-src 'self' 'unsafe-inline'" .
                 " https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js; style-src 'self' 'unsafe-inline'; object-src" .
                 " 'none'; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none';");
-            //header("Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob:; script-src 'self' " .
-            //    "'sha384-df2iQaZF4qu/OgVkNSZQqLfqm4saLMMEaHCH8tzdu0JcIZ4VR3Y22rvlq6W1HOjX'; style-src 'self'; object-src 'none';" .
-            //    " frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none'; form-action 'self'");
+            header("Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob:; script-src 'self' " .
+                "'sha384-df2iQaZF4qu/OgVkNSZQqLfqm4saLMMEaHCH8tzdu0JcIZ4VR3Y22rvlq6W1HOjX'; style-src 'self'; object-src 'none';" .
+                " frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none'; form-action 'self'");
         } elseif ($options['csp'] instanceof ContentSecurityPolicy || is_array($options['csp'])) {
             if ($options['csp'] instanceof ContentSecurityPolicy) $options['csp']->send(); else {
                 foreach ($options['csp'] as $csp) $csp->send();
@@ -123,7 +123,7 @@ function getFrom(array $array, string|int $property, mixed $default = null): mix
 
 function ANTNavHome(bool $selected = false): ANTNavOption
 {
-    return new ANTNavOption('https://antrequest.com', '/dollmaker2/icon/endpoint.php?bgcolor=%2300a8f3&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%23ff0000&RC=%230000ff&v=1',
+    return new ANTNavOption('https://antrequest.nl', '/dollmaker2/icon/endpoint.php?bgcolor=%2300a8f3&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%23ff0000&RC=%230000ff&v=1',
         'Home', new Color('#0073a6'),
         new Color('#00a8f3'), $selected);
 }
