@@ -1,8 +1,9 @@
 <?php namespace ANTHeader;
 
 use Color;
-use ContentSecurityPolicy\ContentSecurityPolicy;
+use DateInterval;
 use Random\RandomException;
+use ContentSecurityPolicy\ContentSecurityPolicy;
 use function Helpers\htmlspecialchars12;
 use function Helpers\json_fromArray;
 
@@ -104,7 +105,7 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     $n = "\n";
     echo "\n\n";
     /** @noinspection JSUnresolvedLibraryURL */
-    echo "<script integrity='sha512-4V50NWjNLKBH60KkunQBWbMwv4pA5NIstr1F2Ossnb691knDWKYaHpGvS1bEyIupZnUnToVz5UQSZM/HIlj/tQ==' ".
+    echo "<script integrity='sha512-4V50NWjNLKBH60KkunQBWbMwv4pA5NIstr1F2Ossnb691knDWKYaHpGvS1bEyIupZnUnToVz5UQSZM/HIlj/tQ==' " .
         "crossorigin=anonymous src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js";
     echo "></script>\n<script src=/require/head2/domContentLoadedPromise.js></script>$n<script"
         . " type=module src=/require/head2/import-v{$options['v']}.js></script></head><body data-bodyheaderset>" .
@@ -372,6 +373,7 @@ function sha512Base64(string $string): string
 
 /**
  * @return string
+ * @throws RandomException
  * @deprecated
  */
 function nonceBase64(): string
@@ -388,4 +390,64 @@ function nonceBase64(): string
 function sendHashApi(string $string, bool $override = false): void
 {
     \HashApi\sendHashApi($string, $override);
+}
+
+function set_cookie(string $name, ?string $value, array $options, bool $send = true): bool|string
+{
+    $name = urlencode($name);
+    $value = is_string($value) ? urlencode($value) : null;
+    if (empty($name)) {
+        return false; // Name must not be empty
+    }
+
+    // Determine if the connection is secure
+    $secure = !empty($_SERVER['HTTPS']) ? 'Secure' : '';
+
+    // Set the domain
+    $domain = "Domain={$_SERVER['SERVER_NAME']}";
+
+    // Validate the path
+
+    if (array_key_exists('path', $options) && is_string($options['path'])) {
+        $path = preg_match('/^[\\/%a-zA-Z\\-0-9._]+$/D', $options['path']) ? "Path={$options['path']}" : '';
+    } else {
+        $path = 'Path=/';
+    }
+
+    // Max-Age handling
+    $date = new \DateTimeImmutable("@{$_SERVER['REQUEST_TIME']}");
+    if (array_key_exists('max-age', $options) && is_integer($maxAge = $options['max-age'])) {
+        $expires = $date->add(new DateInterval("PT{$maxAge}S"));
+        if ($maxAge > 0) {
+            $maxAge = "Max-Age=$maxAge";
+        } else {
+            $maxAge = '';
+        }
+        $expires = "Expires={$expires->format('D, d M Y H:i:s \\G\\M\\T')}";
+    } else {
+        $expires = $maxAge = '';
+    }
+    if (array_key_exists('session', $options) && $options['session']) {
+        $expires = $maxAge = '';
+    }
+
+    // HttpOnly flag
+    $httpOnly = array_key_exists('HttpOnly', $options) && $options['HttpOnly'] ? 'HttpOnly' : '';
+
+    if (empty($value)) {
+        $maxAge = "Max-Age=0";
+        $expires = gmdate('D, d M Y H:i:s', +"{$_SERVER['REQUEST_TIME']}" - 100) . " GMT";
+    }
+
+    $header = '';
+    foreach ([$maxAge, $expires, $domain, $httpOnly, $path, $secure, 'SameSite=Lax'] as $item) {
+        if (empty($item)) continue;
+        $header .= "; $item";
+    }
+    // Assemble the Set-Cookie header
+    $header = "Set-Cookie: $name=$value$header";
+
+    // Send the cookie header
+    if ($send) header($header, false);
+    return $header;
 }

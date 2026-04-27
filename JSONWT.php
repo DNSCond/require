@@ -1,5 +1,7 @@
 <?php namespace JSONWT;
 
+use function HashApi\nonceBase64;
+
 class JWT
 {
     private string $secret;
@@ -11,7 +13,7 @@ class JWT
         $this->issuer = $issuer;
     }
 
-    public function generate(array $data, int $ttl = 3600): string
+    public function generate(array $data, int $ttl = 3600, int|false $nonceLength = 16): string
     {
         $iat = $_SERVER['REQUEST_TIME'] ?? time();
 
@@ -19,11 +21,13 @@ class JWT
             'alg' => 'HS256',
             'typ' => 'JWT',
         ]));
-
-        $payload = $this->base64UrlEncode(json_encode([
+        $body = [
             'iss' => $this->issuer, 'iat' => $iat, 'nbf' => $iat,
             'exp' => $iat + $ttl, 'data' => $data,
-        ]));
+        ];
+        if ($nonceLength > 0) /** @noinspection PhpUnhandledExceptionInspection */
+            $body['nonce'] = nonceBase64($nonceLength);
+        $payload = $this->base64UrlEncode(json_encode($body));
 
         $signature = $this->base64UrlEncode(
             hash_hmac('sha256', "$header.$payload", $this->secret, true)
