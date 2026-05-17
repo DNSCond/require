@@ -26,9 +26,9 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
             header("Content-Security-Policy: default-src 'self'; img-src 'self' blob:; script-src 'self' 'unsafe-inline'" .
                 " https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js; style-src 'self' 'unsafe-inline'; object-src" .
                 " 'none'; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none';");
-            header("Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob:; script-src 'self' " .
-                "'sha384-df2iQaZF4qu/OgVkNSZQqLfqm4saLMMEaHCH8tzdu0JcIZ4VR3Y22rvlq6W1HOjX'; style-src 'self'; object-src 'none';" .
-                " frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none'; form-action 'self'");
+            // header("Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob:; script-src 'self' " .
+            //"'sha384-df2iQaZF4qu/OgVkNSZQqLfqm4saLMMEaHCH8tzdu0JcIZ4VR3Y22rvlq6W1HOjX'; style-src 'self'; object-src 'none';" .
+            //" frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none'; form-action 'self'");
         } elseif ($options['csp'] instanceof ContentSecurityPolicy || is_array($options['csp'])) {
             if ($options['csp'] instanceof ContentSecurityPolicy) $options['csp']->send(); else {
                 foreach ($options['csp'] as $csp) $csp->send();
