@@ -84,8 +84,6 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
         $bgColor = $navOption->bgColor;
         array_unshift($links, new ANTNavLinkTag('icon', $navOption->getURL()));
     }
-    //
-    $naviGatorBarColor = new Color('424242');
     $oldBorderColor = $borderColor;
     // $bgColor = '#a66d00';
     // $borderColor = '#fea700';
@@ -95,24 +93,21 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
         foreach ($links as $link) {
             if (!($link instanceof ANTNavLinkTag || $link instanceof ANTNavScript
                 || $link instanceof ANTNavIStyle || $link instanceof ANTNavIScript
-                || $link instanceof ANTNavMetaTag || $link instanceof ANTNavArbitraryHTML)) {
+                || $link instanceof ANTNavMetaTag || $link instanceof ANTNavArbitraryHTML
+                || $link instanceof ANTNavJSONScript)) {
                 throw new \TypeError("Links Must be 'ANTNavLink's or 'ANTNavIStyle's");
             }
             echo $link->toString();
         }
     }
     echo new ANTNavIStyle(":root{--primaryColor:$borderColor;--secondaryColor:$bgColor;}")->toString();
-    $n = "\n";
-    echo "\n\n";
+    echo "\n";
     /** @noinspection JSUnresolvedLibraryURL */
     echo "<script integrity='sha512-4V50NWjNLKBH60KkunQBWbMwv4pA5NIstr1F2Ossnb691knDWKYaHpGvS1bEyIupZnUnToVz5UQSZM/HIlj/tQ==' " .
-        "crossorigin=anonymous src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js";
-    echo "></script>\n<script src=/require/head2/domContentLoadedPromise.js></script>$n<script"
-        . " type=module src=/require/head2/import-v{$options['v']}.js></script></head><body data-bodyheaderset>" .
-        "\n<nav style=\"color:$naviGatorBarColor;background-color:currentColor;box-sizing:content-box;height:" .
-        "calc(4.4em + 4px);border-bottom: 4px solid $oldBorderColor\"{$options['hiddenTopBar']}><div style=\"display:flex;"
-        . "flex-wrap:nowrap;align-items:center;flex-direction:row;height:100%;position:relative;margin:auto;width:88%;"
-        . "box-sizing:border-box;overflow:auto hidden\">$n" . implode("$n", $nav) . "$n</div></nav>";
+        "crossorigin=anonymous defer src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js></script>";
+    echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>\n<script type=module"
+        . " src=/require/head2/import-v{$options['v']}.js></script></head><body>" .
+        "\n<nav class=headernav{$options['hiddenTopBar']}><div>\n" . implode("\n", $nav) . "\n</div></nav>";
     echo "\n\n<!-- webpage-->\n\n";
     return array();
 }
@@ -206,11 +201,9 @@ class ANTNavOption
                 $borderColor = $bgColor = 'currentColor';
             }
         }
-        return "<div style=\"border-width:4px;border-style:solid;padding:0.2em;width:4em;height:4em;" .
-            "border-color:$borderColor;border-bottom:none;background-color:$bgColor;\"" .
-            "><a href=\"$this->linkTo\" title=\"$this->altText\" $ariaCurrent><img" .
-            " src=\"$this->imageTo\" style=\"width:4em;height:4em;\" " .
-            "width=512 height=512 alt=\"$this->altText\"></a></div>";
+        return "<antnav-option style=border-color:$borderColor;background-color:$bgColor;" .
+            "><a href=\"$this->linkTo\" title=\"$this->altText\" $ariaCurrent><img src=\"" .
+            "$this->imageTo\" width=512 height=512 alt=\"$this->altText\"></a></antnav-option>";
     }
 
     public function __toString(): string
@@ -314,6 +307,40 @@ readonly class ANTNavScript
     {
         $module = ($this->module ? 'type=module' : 'data-type=module');
         return "<script src=\"$this->link\" $module></script>";
+    }
+
+    public function __toString(): string
+    {
+        return $this->toString();
+    }
+}
+
+readonly class ANTNavJSONScript
+{
+    private string $json;
+    private string $type;
+    private ?string $class;
+    private ?string $id;
+
+    public function __construct(mixed $jsonData, string $type = 'application/json', null|string|array $class = null, ?string $id = null)
+    {
+        $htmlFlags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5;
+        $this->json = json_encode($jsonData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+        $this->id = is_null($id) ? null : htmlspecialchars($id, $htmlFlags, 'UTF-8');
+        $this->class = is_null($class) ? null : htmlspecialchars(is_string($class) ? $class : implode(' ', $class), $htmlFlags, 'UTF-8');
+        if (preg_match('/^[a-z0-9\\-_]+\\/[a-z0-9\\-_]+$/D', $type)) {
+            $this->type = $type;
+        } else {
+            $this->type = 'application/json';
+        }
+    }
+
+    public function toString(): string
+    {
+        $attrs = $this->type;
+        if (!is_null($this->class)) $attrs .= "\x20class=\"$this->class\"";
+        if (!is_null($this->id)) $attrs .= "\x20id=\"$this->id\"";
+        return "<script type=$attrs>$this->json</script>";
     }
 
     public function __toString(): string

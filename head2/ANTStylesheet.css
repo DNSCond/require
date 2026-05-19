@@ -67,6 +67,41 @@ body {
     }
 }
 
-button, input, textarea, html {
+button, input, textarea, html, select, option {
     font-family: monospace;
+}
+
+nav.headernav {
+    color: #424242;
+    background-color: currentColor;
+    box-sizing: content-box;
+    height: calc(4.4em + 4px);
+    border-bottom: 4px solid var(--primaryColor);
+
+    > div {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        flex-direction: row;
+        height: 100%;
+        position: relative;
+        margin: auto;
+        width: 88%;
+        box-sizing: border-box;
+        overflow: auto hidden;
+
+        > antnav-option {
+            border-width: 4px;
+            border-style: solid;
+            padding: 0.2em;
+            width: 4em;
+            height: 4em;
+            border-bottom: none;
+
+            > a > img {
+                width: 4em;
+                height: 4em;
+            }
+        }
+    }
 }
