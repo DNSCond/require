@@ -13,19 +13,52 @@ require_once __DIR__ . "/helpers.php";
 function create_head2(string $title, array $user_options, ?array $links = null, ?array $navOptions = null): array
 {
     $options = [
-        'base' => getFrom($user_options, 'base'),
-        'lang' => getFrom($user_options, 'lang', 'en'),
-        'v' => getFrom($user_options, 'moduleVersion', '2'),
-        'desc' => getFrom($user_options, 'desc'),
-        'hiddenTopBar' => getFrom($user_options, 'hiddenTopBar', false) ? ' hidden' : '',
-        'defaultCSP' => getFrom($user_options, 'defaultCSP', true),
-        'csp' => getFrom($user_options, 'csp'),
+            'base' => getFrom($user_options, 'base'),
+            'lang' => getFrom($user_options, 'lang', 'en'),
+            'v' => getFrom($user_options, 'moduleVersion', '2'),
+            'desc' => getFrom($user_options, 'desc'),
+            'hiddenTopBar' => getFrom($user_options, 'hiddenTopBar', false) ? ' hidden' : '',
+            'defaultCSP' => getFrom($user_options, 'defaultCSP', true),
+            'ventHref' => getFrom($user_options, 'ventHref', false),
+            'csp' => getFrom($user_options, 'csp'),
     ];
-    ob_start(function (string $string) use ($options): string {
+    ob_start();
+    // originally 32vh
+    $ventStatus_VentOn = false;
+    $bottom = "<div style=height:100vh>\n";
+    $ventHref = '/gallery/char/window';
+    if (is_string($options['ventHref'])) {
+        $ventStatus_VentOn = true;
+        $ventHref = $options['ventHref'];
+    } ?>
+    <div class=bottom-divs>
+    <div style='height:7vh;border-bottom:4px solid var(--primaryColor)'></div>
+    <div style='height:93vh;background-color:#36393f;background-image:linear-gradient(#2b2d32 5%, #36393f 12%, #36393f 100%)'>
+        <div style=padding:5vh>
+            <a href="<?= $ventHref ?>">
+                <svg width="1280" height="800" viewBox="0 0 1280 800"
+                     xmlns="http://www.w3.org/2000/svg" class="special-event-ventilation">
+                    <rect x="0" y="0" width="1280" height="800" fill="darkgray"/>
+                    <g><?= '<!-- (' . ($ventStatus_VentOn ? 'On' : 'Off') . ') -->';
+                        $ventColorL = ($ventStatus_VentOn ? '#fd9455' : '#36393f');
+                        $ventColorD = ($ventStatus_VentOn ? '#fc6912' : '#36393f');
+                        for ($i = 0; $i < 6; $i++) {
+                            $j = $i * 200 + 100;
+                            echo "<rect x=$j y=80  width=80 height=640 fill='$ventColorL' stroke=gray stroke-width=16 paint-order='stroke'/>";
+                            echo "<rect x=$j y=550 width=80 height=170 fill='$ventColorD'/>";
+                        } ?></g>
+                </svg>
+            </a>
+        </div>
+    </div>
+    </div><?= "\n</div>";
+    $bottom = $bottom . ob_get_clean();
+
+    ob_start(function (string $string) use ($options, $bottom): string {
         if ($options['defaultCSP']) {
             header("Content-Security-Policy: default-src 'self'; img-src 'self' blob:; script-src 'self' 'unsafe-inline'" .
-                " https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js; style-src 'self' 'unsafe-inline'; object-src" .
-                " 'none'; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none';");
+                    " https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js; style-src 'self' 'unsafe-inline'; object-src" .
+                    " 'none'; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none';");
             // header("Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob:; script-src 'self' " .
             //"'sha384-df2iQaZF4qu/OgVkNSZQqLfqm4saLMMEaHCH8tzdu0JcIZ4VR3Y22rvlq6W1HOjX'; style-src 'self'; object-src 'none';" .
             //" frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none'; form-action 'self'");
@@ -41,16 +74,16 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
         //if (preg_match('/^(X-Powered-By)$/iD', $matches[1])) continue;
         //$headers[] = "data-headerset-$matches[1]=\"" . htmlspecialchars12($matches[2]) . "\"";
         //}}$string = str_replace('data-bodyheaderset', implode("\x20", $headers), $string);
-        return "$string<div style=height:32vh></div>\n";
+        return "$string$bottom\n";
     });
     $title = htmlspecialchars12("$title (ANTRequest.nl)");
     $base = !empty($options['base']) ? "<base href=\"{$options['base']}\">" : '<!--base/-->';
     $importmap = json_fromArray([
-        'imports' => array(
-            "Datetime_global" => "/require/head2/datetime-local-v{$options['v']}/Datetime_global.js",
-            "RelativeTimeChecker" => "/require/head2/datetime-local-v{$options['v']}/RelativeTimeChecker.js",
-            "temporal-polyfill" => "/require/head2/temporal.js",
-        ),
+            'imports' => array(
+                    "Datetime_global" => "/require/head2/datetime-local-v{$options['v']}/Datetime_global.js",
+                    "RelativeTimeChecker" => "/require/head2/datetime-local-v{$options['v']}/RelativeTimeChecker.js",
+                    "temporal-polyfill" => "/require/head2/temporal.js",
+            ),
     ], false);
     array_unshift($links, new ANTNavMetaTag('viewport', 'width=device-width,initial-scale=1'));
     if (!empty($options['desc'])) {
@@ -92,9 +125,9 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
         array_unshift($links, new ANTNavMetaTag('theme-color', "$bgColor"));
         foreach ($links as $link) {
             if (!($link instanceof ANTNavLinkTag || $link instanceof ANTNavScript
-                || $link instanceof ANTNavIStyle || $link instanceof ANTNavIScript
-                || $link instanceof ANTNavMetaTag || $link instanceof ANTNavArbitraryHTML
-                || $link instanceof ANTNavJSONScript)) {
+                    || $link instanceof ANTNavIStyle || $link instanceof ANTNavIScript
+                    || $link instanceof ANTNavMetaTag || $link instanceof ANTNavArbitraryHTML
+                    || $link instanceof ANTNavJSONScript)) {
                 throw new \TypeError("Links Must be 'ANTNavLink's or 'ANTNavIStyle's");
             }
             echo $link->toString();
@@ -104,10 +137,10 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     echo "\n";
     /** @noinspection JSUnresolvedLibraryURL */
     echo "<script integrity='sha512-4V50NWjNLKBH60KkunQBWbMwv4pA5NIstr1F2Ossnb691knDWKYaHpGvS1bEyIupZnUnToVz5UQSZM/HIlj/tQ==' " .
-        "crossorigin=anonymous defer src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js></script>";
+            "crossorigin=anonymous defer src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js></script>";
     echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>\n<script type=module"
-        . " src=/require/head2/import-v{$options['v']}.js></script></head><body>" .
-        "\n<nav class=headernav{$options['hiddenTopBar']}><div>\n" . implode("\n", $nav) . "\n</div></nav>";
+            . " src=/require/head2/import-v{$options['v']}.js></script></head><body>" .
+            "\n<nav class=headernav{$options['hiddenTopBar']}><div>\n" . implode("\n", $nav) . "\n</div></nav>";
     echo "\n\n<!-- webpage-->\n\n";
     return array();
 }
@@ -120,34 +153,34 @@ function getFrom(array $array, string|int $property, mixed $default = null): mix
 function ANTNavHome(bool $selected = false): ANTNavOption
 {
     return new ANTNavOption('https://antrequest.nl', '/dollmaker2/icon/endpoint.php?bgcolor=%2300a8f3&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%23ff0000&RC=%230000ff&v=1',
-        'Home', new Color('#0073a6'),
-        new Color('#00a8f3'), $selected);
+            'Home', new Color('#0073a6'),
+            new Color('#00a8f3'), $selected);
 }
 
 function ANTNavFavicond(string $linkTo, string $altText, bool $selected = false): ANTNavOption
 {
     return new ANTNavOption("$linkTo", '/dollmaker2/icon/endpoint.php?bgcolor=%2300a8f3&fgcolor=%238cfffa&L=%23fff200&W=%23000000&LC=%23ff0000&RC=%230000ff&v=1',
-        "$altText", new Color('#0073a6'),
-        new Color('#00a8f3'), $selected);
+            "$altText", new Color('#0073a6'),
+            new Color('#00a8f3'), $selected);
 }
 
 function ANTNavReddcond(string $linkTo, string $altText, bool $selected = false): ANTNavOption
 {
     return new ANTNavOption("$linkTo", '/dollmaker2/icon/endpoint.php?preset=Reddcat', "$altText",
-        new Color('a62c00'), new Color('ff4500'), $selected);
+            new Color('a62c00'), new Color('ff4500'), $selected);
 }
 
 function ANTNavBuzz(string $linkTo, string $altText, bool $selected = false): ANTNavOption
 {
     return new ANTNavOption("$linkTo", '/dollmaker2/icon/endpoint.php?bgcolor=%23fff100&fgcolor=%238cfffa' .
-        '&L=%23fff200&W=%23000000&LC=%2300a8f3&RC=%23ff4500&accessory=mouth+Left_Light+RightLight+Middle+stripes',
-        "$altText", new Color('a68300'), new Color('fff100'), $selected);
+            '&L=%23fff200&W=%23000000&LC=%2300a8f3&RC=%23ff4500&accessory=mouth+Left_Light+RightLight+Middle+stripes',
+            "$altText", new Color('a68300'), new Color('fff100'), $selected);
 }
 
 function ANTNavBinary(string $linkTo, string $altText, bool $selected = false): ANTNavOption
 {
     return new ANTNavOption("$linkTo", '/dollmaker2/icon/endpoint.php?preset=Binary', "$altText",
-        new Color('00a600'), new Color('00ff00'), $selected);
+            new Color('00a600'), new Color('00ff00'), $selected);
 }
 
 class ANTNavOption
@@ -169,12 +202,12 @@ class ANTNavOption
      * @param bool $selected if its the current selected tab
      */
     public function __construct(
-        string       $linkTo,
-        string       $imageTo,
-        string       $altText,
-        Color|string $bgColor,
-        Color|string $borderColor,
-        public bool  $selected = false)
+            string       $linkTo,
+            string       $imageTo,
+            string       $altText,
+            Color|string $bgColor,
+            Color|string $borderColor,
+            public bool  $selected = false)
     {
         $this->bgColor = new Color($bgColor);
         $this->borderColor = new Color($borderColor);
@@ -202,8 +235,8 @@ class ANTNavOption
             }
         }
         return "<antnav-option style=border-color:$borderColor;background-color:$bgColor;" .
-            "><a href=\"$this->linkTo\" title=\"$this->altText\" $ariaCurrent><img src=\"" .
-            "$this->imageTo\" width=512 height=512 alt=\"$this->altText\"></a></antnav-option>";
+                "><a href=\"$this->linkTo\" title=\"$this->altText\" $ariaCurrent><img src=\"" .
+                "$this->imageTo\" width=512 height=512 alt=\"$this->altText\"></a></antnav-option>";
     }
 
     public function __toString(): string

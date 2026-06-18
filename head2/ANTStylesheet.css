@@ -105,3 +105,12 @@ nav.headernav {
         }
     }
 }
+
+.special-event-ventilation {
+    aspect-ratio: 1200 / 800;
+    max-height: 75vh;
+    display: block;
+    margin: auto;
+    height: auto;
+    width: auto;
+}
