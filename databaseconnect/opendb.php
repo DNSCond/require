@@ -4,7 +4,7 @@ function getDBSettings()
 {
     static $dbc;
     if ($dbc) return $dbc;
-    return $dbc = json_decode(file_get_contents(__DIR__ . '/dbc/database.json'), true);
+    return $dbc = json_decode(file_get_contents(__DIR__ . '/database.json'), true);
 }
 
 function getPDO(): ?PDO
