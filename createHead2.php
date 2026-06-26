@@ -78,13 +78,13 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     });
     $title = htmlspecialchars12("$title (ANTRequest.nl)");
     $base = !empty($options['base']) ? "<base href=\"{$options['base']}\">" : '<!--base/-->';
-    $importmap = json_fromArray([
+    $importmap = json_encode([
             'imports' => array(
                     "Datetime_global" => "/require/head2/datetime-local-v{$options['v']}/Datetime_global.js",
                     "RelativeTimeChecker" => "/require/head2/datetime-local-v{$options['v']}/RelativeTimeChecker.js",
                     "temporal-polyfill" => "/require/head2/temporal.js",
             ),
-    ], false);
+    ]);
     array_unshift($links, new ANTNavMetaTag('viewport', 'width=device-width,initial-scale=1'));
     if (!empty($options['desc'])) {
         array_unshift($links, new ANTNavMetaTag('description', $options['desc']));

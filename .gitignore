@@ -1,2 +1,4 @@
 requesthashOf.py
 requesthashOf-out.txt
+databaseconnect/database.json
+databaseconnect/database.prod.json
