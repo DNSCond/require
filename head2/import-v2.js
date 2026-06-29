@@ -1,6 +1,9 @@
 import {Datetime_global} from "Datetime_global";
 import {ClockTime, RelativeTime} from "RelativeTimeChecker";
+import {ClockTimeBuiltin, RelativeTimeBuiltin} from "AlternativeBuiltins";
 
+globalThis.RelativeTimeBuiltin = RelativeTimeBuiltin;
+globalThis.ClockTimeBuiltin = ClockTimeBuiltin;
 globalThis.Datetime_global = Datetime_global;
 globalThis.RelativeTime = RelativeTime;
 globalThis.ClockTime = ClockTime;

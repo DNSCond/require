@@ -76,4 +76,3 @@ export function createTimeElement(date, classArray = []) {
     }
     return time;
 }
-//# sourceMappingURL=Datetime_HTML.js.map

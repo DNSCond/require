@@ -1,5 +1,6 @@
 import { Temporal } from 'temporal-polyfill';
 import { ZDTDuration } from "./ZDTDuration.js";
+import { Dateinternals } from "./Datetime_local.js";
 /**
  * this class `Datetime_global` should behave exactly like `Date` if a name matches that on `Date`.
  */
@@ -86,63 +87,67 @@ export const Datetime_global = function (from = undefined, timezoneId = Temporal
     const self = new.target ? this : Object.create(Datetime_global.prototype);
     Object.defineProperties(self, {
         time: { value, writable, enumerable, configurable, },
-        year: {
-            get() {
-                return this.getFullYear();
-            }, enumerable, configurable,
-        }, month: {
-            get() {
-                return this.time?.month ?? NaN;
-            }, enumerable, configurable,
-        }, day: {
-            get() {
-                return this.getDate();
-            }, enumerable, configurable,
-        }, dayOfWeek: {
-            get() {
-                return this.time?.dayOfWeek ?? NaN;
-            }, enumerable, configurable,
-        }, hour: {
-            get() {
-                return this.getHours();
-            }, enumerable, configurable,
-        }, minute: {
-            get() {
-                return this.getMinutes();
-            }, enumerable, configurable,
-        }, second: {
-            get() {
-                return this.getSeconds();
-            }, enumerable, configurable,
-        }, millisecond: {
-            get() {
-                return this.time?.millisecond ?? NaN;
-            }, enumerable, configurable,
-        }, microsecond: {
-            get() {
-                return this.time?.microsecond ?? NaN;
-            }, enumerable, configurable,
-        }, nanosecond: {
-            get() {
-                return this.time?.nanosecond ?? NaN;
-            }, enumerable, configurable,
-        }, epochMilliseconds: {
-            get() {
-                return this.time?.epochMilliseconds ?? NaN;
-            }, enumerable, configurable,
-        }, epochNanoseconds: {
-            get() {
-                return this.time?.epochNanoseconds ?? null;
-            }, set(value) {
-                this.time = new Temporal.ZonedDateTime(BigInt(value), this.timezoneId);
-            }, enumerable, configurable,
-        },
     });
     if (!new.target)
         return self.toString();
 };
+export function fromDateSignature(year, monthCode, date, hours, minutes, seconds, milliseconds) {
+    const args = [year, monthCode, date, hours, minutes, seconds, milliseconds];
+    args.length = arguments.length;
+    return new Datetime_global(Reflect.construct(Date, args));
+}
 Object.defineProperties(Datetime_global.prototype, {
-    minutesAfterMidnight: {
+    year: {
+        get() {
+            return this.getFullYear();
+        }, enumerable, configurable,
+    }, month: {
+        get() {
+            return this.time?.month ?? NaN;
+        }, enumerable, configurable,
+    }, day: {
+        get() {
+            return this.getDate();
+        }, enumerable, configurable,
+    }, dayOfWeek: {
+        get() {
+            return this.time?.dayOfWeek ?? NaN;
+        }, enumerable, configurable,
+    }, hour: {
+        get() {
+            return this.getHours();
+        }, enumerable, configurable,
+    }, minute: {
+        get() {
+            return this.getMinutes();
+        }, enumerable, configurable,
+    }, second: {
+        get() {
+            return this.getSeconds();
+        }, enumerable, configurable,
+    }, millisecond: {
+        get() {
+            return this.time?.millisecond ?? NaN;
+        }, enumerable, configurable,
+    }, microsecond: {
+        get() {
+            return this.time?.microsecond ?? NaN;
+        }, enumerable, configurable,
+    }, nanosecond: {
+        get() {
+            return this.time?.nanosecond ?? NaN;
+        }, enumerable, configurable,
+    }, epochMilliseconds: {
+        get() {
+            return this.time?.epochMilliseconds ?? NaN;
+        }, enumerable, configurable,
+    }, epochNanoseconds: {
+        get() {
+            return this.time?.epochNanoseconds ?? null;
+        }, set(value) {
+            this.time = new Temporal.ZonedDateTime(BigInt(value), this.timezoneId);
+        }, enumerable, configurable,
+    }, minutesAfterMidnight: {
         get() {
             const { time } = this;
             if (time === null)
@@ -158,7 +163,7 @@ Object.defineProperties(Datetime_global.prototype, {
         get() {
             const time = this.validate();
             if (time === null)
-                throw new RangeError('Datetime_global timezoneId requires to be valid');
+                throw RangeError('Datetime_global timezoneId requires to be valid');
             return time.timeZoneId;
         }, set(value) {
             this.time = this.toTimezone(value).toTemporalZonedDateTime();
@@ -172,7 +177,7 @@ Object.defineProperties(Datetime_global.prototype, {
                 this.time = new Temporal.ZonedDateTime(instant.epochNanoseconds, this.getTimezoneId());
             }
             else
-                throw new TypeError('date must be set using a Date.');
+                throw TypeError('date must be set using a Date.');
         }, enumerable, configurable,
     },
 });
@@ -282,16 +287,17 @@ Datetime_global.zerons = function () {
  * console.log(Datetime_global.parse("2025-04-18T00:00:00Z")); // 1745193600000
  */
 Datetime_global.parse = Date.parse;
+Datetime_global.prototype[Symbol.toPrimitive] = Date.prototype[Symbol.toPrimitive];
 Datetime_global.prototype[Symbol.toStringTag] = 'Datetime_global';
 Datetime_global[Symbol.toStringTag] = 'Datetime_global_constructor';
 Datetime_global.prototype.validate = function () {
     if (typeof this.time === 'object') {
         if (!+(this.time instanceof Temporal.ZonedDateTime) || this.time === null)
-            throw new TypeError('Datetime_global.prototype.time must be null or a Temporal.ZonedDateTime');
+            throw TypeError('Datetime_global.prototype.time must be null or a Temporal.ZonedDateTime');
         return this.time;
     }
     else {
-        throw new TypeError('Datetime_global.prototype.time must be null or a Temporal.ZonedDateTime');
+        throw TypeError('Datetime_global.prototype.time must be null or a Temporal.ZonedDateTime');
     }
 };
 /**
@@ -314,7 +320,7 @@ Datetime_global.prototype.toDate = function () {
 Datetime_global.prototype.toTimezone = Datetime_global.prototype.withTimezone = function (timezoneId) {
     const time = this.validate();
     if (time === null)
-        throw new RangeError('Datetime_global.prototype.toTimezone requires to be valid');
+        throw RangeError('Datetime_global.prototype.toTimezone requires to be valid');
     return new Datetime_global(time.epochNanoseconds, timezoneId);
 };
 /**
@@ -325,7 +331,7 @@ Datetime_global.prototype.toTimezone = Datetime_global.prototype.withTimezone = 
 Datetime_global.prototype.getTimezoneId = function () {
     const time = this.validate();
     if (time === null)
-        throw new RangeError('Datetime_global.prototype.getTimezoneId requires to be valid');
+        throw RangeError('Datetime_global.prototype.getTimezoneId requires to be valid');
     return time.timeZoneId;
 };
 /**
@@ -722,17 +728,17 @@ Datetime_global.prototype.toJSON = function () {
  * console.log(dt.toISOString()); // "2026-04-18T00:00:00.000Z"
  */
 Datetime_global.prototype.setFullYear = function (fullYear, month, date) {
-    const this_time = this.validate();
-    date = (((arguments.length > 1 ? date : this_time?.day))) ?? NaN;
-    month = (arguments.length > 2 ? month : this_time?.month) ?? NaN;
+    const this_time = this.validate(), currentFallMonth = this_time?.month - 1;
+    date = (((arguments.length > 2 ? date : this_time?.day))) ?? NaN;
+    month = (arguments.length > 1 ? month : currentFallMonth) ?? NaN;
     if (NaNInArray([toDateValue(this_time?.epochMilliseconds), date, month]) || this_time === null) {
         this.time = null;
         return NaN;
     }
     const year = fullYear, try_date = {
-        year: toNumber(year), day: toNumber(date), month: toNumber(month) + 1,
-    }, self_time = overflowDatetime_global(this, try_date);
-    return (this.time = self_time).epochMilliseconds;
+        year: toNumber(year), day: toNumber(date), month: toNumber(month),
+    }, time = overflowDatetime_global(this, try_date);
+    return (this.time = time)?.epochMilliseconds ?? NaN;
 };
 function toNumber(mixed) {
     return toDateValue(mixed);
@@ -798,7 +804,7 @@ Datetime_global.prototype.setHours = function (hours, minutes, seconds, millisec
         second: toNumber(seconds),
         millisecond: toNumber(milliseconds),
     }, time = overflowDatetime_global(this, try_time);
-    return (this.time = time).epochMilliseconds;
+    return (this.time = time)?.epochMilliseconds ?? NaN;
 };
 /**
  * Sets the minutes, optionally seconds and milliseconds, modifying the instance in place.
@@ -960,6 +966,9 @@ Datetime_global.prototype.setUTCSeconds = function (seconds, milliseconds) {
     milliseconds = arguments.length > 1 ? milliseconds : this.getUTCMilliseconds();
     return this.setUTCHours(this.getUTCHours(), this.getUTCMinutes(), seconds, milliseconds);
 };
+Datetime_global.prototype.setUTCMilliseconds = function (milliseconds) {
+    return this.setUTCHours(this.getUTCHours(), this.getUTCMinutes(), this.getUTCSeconds(), milliseconds);
+};
 /**
  * Returns the internal Temporal.ZonedDateTime instance.
  * @returns The Temporal.ZonedDateTime.
@@ -971,7 +980,7 @@ Datetime_global.prototype.setUTCSeconds = function (seconds, milliseconds) {
 Datetime_global.prototype.toTemporalZonedDateTime = function () {
     const zdt = this.validate();
     if (zdt === null)
-        throw new RangeError('Datetime_global.prototype.toTemporalZonedDateTime requires the datetime to be valid');
+        throw RangeError('Datetime_global.prototype.toTemporalZonedDateTime requires the datetime to be valid');
     return zdt;
 };
 // custom
@@ -990,7 +999,7 @@ Datetime_global.prototype.toTemporalZonedDateTime = function () {
 Datetime_global.prototype.setNanoseconds = function (nanoseconds = 0n, microseconds) {
     const self_time = this.validate(), did_specify_microseconds = arguments.length > 1;
     if (self_time === null)
-        throw new TypeError('cannot set nanoseconds on invalid object');
+        throw TypeError('cannot set nanoseconds on invalid object');
     microseconds = BigInt(did_specify_microseconds ? (microseconds ?? 0) : self_time.microsecond);
     return BigInt((this.time = new Temporal.ZonedDateTime(self_time.with({
         microsecond: did_specify_microseconds ? 0 : self_time.microsecond,
@@ -1007,7 +1016,7 @@ Datetime_global.prototype.setNanoseconds = function (nanoseconds = 0n, microseco
 Datetime_global.prototype.getUTCNanoseconds = Datetime_global.prototype.getNanoseconds = function () {
     const this_time = this.validate();
     if (this_time === null)
-        throw new TypeError('cannot get nanoseconds on invalid object');
+        throw TypeError('cannot get nanoseconds on invalid object');
     return (BigInt(this_time.microsecond) * 1000n) + BigInt(this_time.nanosecond);
 };
 /**
@@ -1019,12 +1028,12 @@ Datetime_global.prototype.getUTCNanoseconds = Datetime_global.prototype.getNanos
  */
 Datetime_global.getUTCOffset = function (offset) {
     if (isNaN(offset))
-        return 'UTC+0000';
+        return 'GMT+0000';
     const sign = offset > 0 ? "-" : "+", absOffset = Math.abs(offset);
     const pad = (n) => padNumber(n).replace(/^\+/, '');
     const hours = pad(Math.trunc(absOffset / 60));
     const minutes = pad(absOffset % 60);
-    return `UTC${sign}${hours}${minutes}`;
+    return `GMT${sign}${hours}${minutes}`;
 };
 /**
  * Updates the innerText of HTML <time> elements with formatted date-time strings.
@@ -1384,7 +1393,7 @@ export const plainToZoned = function (tempTime) {
         time = new Datetime_global(Temporal.Now.plainDateISO().toPlainDateTime(tempTime).toZonedDateTime(temporalTimezoneId));
     }
     else {
-        throw new TypeError('Custom object time property must be Datetime_global, Date, Temporal.ZonedDateTime, Temporal.Instant, Temporal.PlainDateTime, Temporal.PlainDate, Temporal.PlainYearMonth, Temporal.PlainTime, or undefined');
+        throw TypeError('Custom object time property must be Datetime_global, Date, Temporal.ZonedDateTime, Temporal.Instant, Temporal.PlainDateTime, Temporal.PlainDate, Temporal.PlainYearMonth, Temporal.PlainTime, or undefined');
     }
     return time;
 };
@@ -1428,7 +1437,7 @@ Datetime_global.prototype.templateFormat = function (strings, ...expressions) {
                             exp = self.toDate().toString();
                             break;
                         default:
-                            throw new TypeError('Symbols are not supported; convert to string');
+                            throw TypeError('Symbols are not supported; convert to string');
                     }
                     break;
                 case "function":
@@ -1499,12 +1508,12 @@ Datetime_global.prototype.templateFormat = function (strings, ...expressions) {
                             }
                             if ('callback' in exp) {
                                 if (typeof exp.callback !== 'function') {
-                                    throw new TypeError('callbacks in custom objects must be functions');
+                                    throw TypeError('callbacks in custom objects must be functions');
                                 }
                                 resultExp = String(exp.callback.call(exp, time.clone()));
                             }
                             if ('pattern' in exp && ('localeOptions' in exp || 'locale' in exp)) {
-                                throw new TypeError('Cannot combine pattern with locale or localeOptions');
+                                throw TypeError('Cannot combine pattern with locale or localeOptions');
                             }
                             else if ('pattern' in exp && typeof exp['pattern'] === 'string') {
                                 resultExp = time.format(exp['pattern']);
@@ -1513,7 +1522,7 @@ Datetime_global.prototype.templateFormat = function (strings, ...expressions) {
                                 resultExp = time.toTemporalZonedDateTime().toLocaleString(exp['locale'], exp['localeOptions']);
                             }
                             else {
-                                throw new TypeError('if a pattern is on a custom object then it must be a string');
+                                throw TypeError('if a pattern is on a custom object then it must be a string');
                             }
                             exp = resultExp;
                         }
@@ -1563,7 +1572,7 @@ export const toSwatchInternetTime = function (date) {
 Datetime_global.prototype.withCalender = function (calender = "iso8601") {
     const this_time = this.validate();
     if (this_time === null)
-        throw new RangeError('Datetime_global withCalender requires to be valid');
+        throw RangeError('Datetime_global withCalender requires to be valid');
     const datetime_global = new Datetime_global(this_time.epochNanoseconds, this_time.timeZoneId);
     datetime_global.time = datetime_global.time.withCalendar(calender);
     return datetime_global;
@@ -1589,7 +1598,7 @@ Datetime_global.prototype.clone = function () {
 Datetime_global.prototype.startOfDay = function (timezone) {
     const this_time = (timezone ? this.toTimezone(timezone) : this).validate();
     if (this_time === null)
-        throw new RangeError('Datetime_global startOfDay requires to be valid');
+        throw RangeError('Datetime_global startOfDay requires to be valid');
     return new Datetime_global(this_time.startOfDay().epochNanoseconds, this.time.timeZoneId);
 };
 /**
@@ -1600,7 +1609,7 @@ Datetime_global.prototype.startOfDay = function (timezone) {
 Datetime_global.prototype.getTimestamp = function () {
     const this_time = this.validate();
     if (this_time === null)
-        throw new RangeError('Datetime_global getTimestamp requires to be valid');
+        throw RangeError('Datetime_global getTimestamp requires to be valid');
     return this_time.epochNanoseconds;
 };
 export const ordinalSuffix = function (value) {
@@ -1675,7 +1684,7 @@ function toPrimitive(o, preference) {
     else {
         return o;
     }
-    throw new TypeError('that could not be converted to Primitive');
+    throw TypeError('that could not be converted to Primitive');
 }
 /**
  * @deprecated
@@ -1743,14 +1752,15 @@ export function toNumeric(value, type = null) {
  * ```
  */
 export function overflowDatetime_global(zonedDateTime, overflow_overwrite) {
-    // Extract the ZonedDateTime object
     const self_time = Datetime_global.prototype.validate.call(zonedDateTime);
+    if (self_time === undefined)
+        return null;
     if (self_time === null)
-        throw new TypeError('Datetime_global.prototype.validate.call');
-    // Prepare the fields with defaults from self_time
+        return null;
     const try_time = {
         year: overflow_overwrite.year ?? self_time.year,
-        month: overflow_overwrite.month ?? self_time.month,
+        // month: overflow_overwrite.month ?? (self_time.month - 1),
+        month: (overflow_overwrite.month ?? self_time.month) - 1,
         day: overflow_overwrite.day ?? self_time.day,
         hour: overflow_overwrite.hour ?? self_time.hour,
         minute: overflow_overwrite.minute ?? self_time.minute,
@@ -1758,25 +1768,11 @@ export function overflowDatetime_global(zonedDateTime, overflow_overwrite) {
         millisecond: overflow_overwrite.millisecond ?? self_time.millisecond,
         microsecond: overflow_overwrite.microsecond ?? self_time.microsecond,
         nanosecond: overflow_overwrite.nanosecond ?? self_time.nanosecond,
-    };
-    // Calculate the differences (overflow/underflow) from the base time
-    const duration = {
-        years: try_time.year - self_time.year,
-        months: try_time.month - self_time.month,
-        days: try_time.day - self_time.day,
-        hours: try_time.hour - self_time.hour,
-        minutes: try_time.minute - self_time.minute,
-        seconds: try_time.second - self_time.second,
-        milliseconds: try_time.millisecond - self_time.millisecond,
-        microseconds: try_time.microsecond - self_time.microsecond,
-        nanoseconds: try_time.nanosecond - self_time.nanosecond,
-    };
-    let zoneddatetime = self_time;
-    for (const unit of ['years', 'months', 'days', 'hours', 'minutes', 'seconds', 'milliseconds', 'microseconds', 'nanoseconds']) {
-        // @ts-expect-error
-        zoneddatetime = zoneddatetime.add(Temporal.Duration.from({ [unit]: duration[unit] }));
-    }
-    return zoneddatetime;
+    }, mktime = Dateinternals.TimeClip(Dateinternals.MakeDate(Dateinternals.MakeDay(try_time.year, try_time.month, try_time.day), Dateinternals.MakeTime(try_time.hour, try_time.minute, try_time.second, try_time.millisecond)));
+    if (isNaN(mktime) || isNaN(try_time.microsecond ?? NaN) || isNaN(try_time.nanosecond ?? NaN))
+        return null;
+    return new Temporal.ZonedDateTime(BigInt(mktime) * 1000000n +
+        BigInt((try_time.microsecond * 1_000) + try_time.nanosecond), self_time.timeZoneId);
 }
 Datetime_global.hostLocalTimezone = function () {
     return Temporal.Now.timeZoneId();
@@ -1787,11 +1783,11 @@ export function padNumber(number, zeros = 2) {
     if (number === +Infinity) return 'Positive Infinity';//
     if (number === -Infinity) return 'Negative Infinity';*/
     if (Number.isNaN(number))
-        throw new TypeError('Not A Number is encountered');
+        throw TypeError('Not A Number is encountered');
     if (number === +Infinity)
-        throw new TypeError('Positive Infinity is encountered');
+        throw TypeError('Positive Infinity is encountered');
     if (number === -Infinity)
-        throw new TypeError('Negative Infinity is encountered');
+        throw TypeError('Negative Infinity is encountered');
     let negative = false;
     if (number < 0) {
         negative = true;
@@ -1833,4 +1829,3 @@ export function validateTimezone(timezoneId, rethrowIfInvalid = false) {
     }
     return { valid: true, error: null };
 }
-//# sourceMappingURL=Datetime_global.js.map

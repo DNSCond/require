@@ -42,9 +42,10 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
                     <g><?= '<!-- (' . ($ventStatus_VentOn ? 'On' : 'Off') . ') -->';
                         $ventColorL = ($ventStatus_VentOn ? '#fd9455' : '#36393f');
                         $ventColorD = ($ventStatus_VentOn ? '#fc6912' : '#36393f');
+                        $attrs = 'stroke=gray stroke-width=16 paint-order=\'stroke\'';
                         for ($i = 0; $i < 6; $i++) {
                             $j = $i * 200 + 100;
-                            echo "<rect x=$j y=80  width=80 height=640 fill='$ventColorL' stroke=gray stroke-width=16 paint-order='stroke'/>";
+                            echo "<rect x=$j y=80  width=80 height=640 fill='$ventColorL' $attrs/>";
                             echo "<rect x=$j y=550 width=80 height=170 fill='$ventColorD'/>";
                         } ?></g>
                 </svg>
@@ -67,13 +68,6 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
                 foreach ($options['csp'] as $csp) $csp->send();
             }
         }
-        header('vary: User-Agent', false);
-        \HashApi\sendHashApi($string);
-        //$headers = array();foreach (headers_list() as $item) {
-        //if (preg_match('/^([^:]+):\\s*(.*)$/D', $item, $matches)) {
-        //if (preg_match('/^(X-Powered-By)$/iD', $matches[1])) continue;
-        //$headers[] = "data-headerset-$matches[1]=\"" . htmlspecialchars12($matches[2]) . "\"";
-        //}}$string = str_replace('data-bodyheaderset', implode("\x20", $headers), $string);
         return "$string$bottom\n";
     });
     $title = htmlspecialchars12("$title (ANTRequest.nl)");
@@ -82,15 +76,18 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
             'imports' => array(
                     "Datetime_global" => "/require/head2/datetime-local-v{$options['v']}/Datetime_global.js",
                     "RelativeTimeChecker" => "/require/head2/datetime-local-v{$options['v']}/RelativeTimeChecker.js",
-                    "temporal-polyfill" => "/require/head2/temporal.js",
+                    "AlternativeBuiltins" => "/require/head2/datetime-local-v{$options['v']}/AlternativeBuiltins.js",
+                    "temporal-polyfill" => "/require/head2/temporal.js", "anthelpers" => "/require/head2/anthelpers.js",
             ),
     ]);
     array_unshift($links, new ANTNavMetaTag('viewport', 'width=device-width,initial-scale=1'));
     if (!empty($options['desc'])) {
         array_unshift($links, new ANTNavMetaTag('description', $options['desc']));
     }
-    echo "<!DOCTYPE html><html lang=\"{$options['lang']}\"><meta charset=UTF-8><title>$title</title>$base\n";
-    echo "<script type=importmap>$importmap</script>\n\n";
+    echo "<!DOCTYPE html><html lang=\"{$options['lang']}\"><meta charset=UTF-8>" .
+            "<title>$title</title>$base\n<script type=importmap is=output" .
+            "-script>$importmap</script><script src=/require/JSONScript" .
+            ".js type=module></script>\n\n";
 
     $nav = [];
     $bgColor = '#0073a6';
@@ -117,7 +114,7 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
         $bgColor = $navOption->bgColor;
         array_unshift($links, new ANTNavLinkTag('icon', $navOption->getURL()));
     }
-    $oldBorderColor = $borderColor;
+    // $oldBorderColor=$borderColor;
     // $bgColor = '#a66d00';
     // $borderColor = '#fea700';
     array_unshift($links, new ANTNavLinkTag('stylesheet', '/require/head2/ANTStylesheet.css'));
@@ -126,8 +123,8 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
         foreach ($links as $link) {
             if (!($link instanceof ANTNavLinkTag || $link instanceof ANTNavScript
                     || $link instanceof ANTNavIStyle || $link instanceof ANTNavIScript
-                    || $link instanceof ANTNavMetaTag || $link instanceof ANTNavArbitraryHTML
-                    || $link instanceof ANTNavJSONScript)) {
+                    || $link instanceof ANTNavMetaTag || $link instanceof ANTNavJSONScript
+                    || $link instanceof ANTNavArbitraryHTML)) {
                 throw new \TypeError("Links Must be 'ANTNavLink's or 'ANTNavIStyle's");
             }
             echo $link->toString();
@@ -140,7 +137,8 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
             "crossorigin=anonymous defer src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js></script>";
     echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>\n<script type=module"
             . " src=/require/head2/import-v{$options['v']}.js></script></head><body>" .
-            "\n<nav class=headernav{$options['hiddenTopBar']}><div>\n" . implode("\n", $nav) . "\n</div></nav>";
+            "\n<nav class=headernav{$options['hiddenTopBar']}><div>\n" .
+            implode("\n", $nav) . "\n</div></nav>";
     echo "\n\n<!-- webpage-->\n\n";
     return array();
 }
