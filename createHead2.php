@@ -85,9 +85,9 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
         array_unshift($links, new ANTNavMetaTag('description', $options['desc']));
     }
     echo "<!DOCTYPE html><html lang=\"{$options['lang']}\"><meta charset=UTF-8>" .
-            "<title>$title</title>$base\n<script type=importmap is=output" .
-            "-script>$importmap</script><script src=/require/JSONScript" .
-            ".js type=module></script>\n\n";
+            "<title>$title</title>$base\n<script type=importmap>$importmap" .
+            "</script><script src=/require/JSONScript.js type=module>" .
+            "</script>\n\n";
 
     $nav = [];
     $bgColor = '#0073a6';
