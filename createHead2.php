@@ -25,7 +25,7 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     ob_start();
     // originally 32vh
     $ventStatus_VentOn = false;
-    $bottom = "<div style=height:100vh>\n";
+    $bottom = "<div style=height:100vh>";
     $ventHref = '/gallery/char/window';
     if (is_string($options['ventHref'])) {
         $ventStatus_VentOn = true;
@@ -46,14 +46,15 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
                         for ($i = 0; $i < 6; $i++) {
                             $j = $i * 200 + 100;
                             echo "<rect x=$j y=80  width=80 height=640 fill='$ventColorL' $attrs/>";
-                            echo "<rect x=$j y=550 width=80 height=170 fill='$ventColorD'/>";
+                            echo "<rect x=$j y=550 width=80 height=170 fill='$ventColorD'/>\x20";
                         } ?></g>
                 </svg>
             </a>
         </div>
     </div>
     </div><?= "\n</div>";
-    $bottom = $bottom . ob_get_clean();
+    $bottom = $bottom . preg_replace('/\\s+/', ' ', ob_get_clean());
+    $bottom = str_replace('> <', ">\n<", $bottom);
 
     ob_start(function (string $string) use ($options, $bottom): string {
         if ($options['defaultCSP']) {
