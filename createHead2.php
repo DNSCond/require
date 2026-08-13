@@ -134,8 +134,8 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     echo new ANTNavIStyle(":root{--primaryColor:$borderColor;--secondaryColor:$bgColor;}")->toString();
     echo "\n";
     /** @noinspection JSUnresolvedLibraryURL */
-    echo "<script integrity='sha512-4V50NWjNLKBH60KkunQBWbMwv4pA5NIstr1F2Ossnb691knDWKYaHpGvS1bEyIupZnUnToVz5UQSZM/HIlj/tQ==' " .
-            "crossorigin=anonymous defer src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js></script>";
+    /*echo "<script integrity='sha512-4V50NWjNLKBH60KkunQBWbMwv4pA5NIstr1F2Ossnb691knDWKYaHpGvS1bEyIupZnUnToVz5UQSZM/HIlj/tQ==' " .
+            "crossorigin=anonymous defer src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js></script>";*/
     echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>\n<script type=module"
             . " src=/require/head2/import-v{$options['v']}.js></script></head><body>" .
             "\n<nav class=headernav{$options['hiddenTopBar']}><div>\n" .
