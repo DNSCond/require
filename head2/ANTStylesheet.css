@@ -76,7 +76,7 @@ nav.headernav {
     background-color: currentColor;
     box-sizing: content-box;
     height: calc(4.4em + 4px);
-    border-bottom: 4px solid var(--primaryColor);
+    /*border-bottom: 4px solid var(--primaryColor);*/
 
     > div {
         display: flex;
@@ -106,6 +106,79 @@ nav.headernav {
     }
 }
 
+nav.headernav {
+    /*noinspection CssInvalidFunction*/
+    --base-color: attr(data-base-color type(< color >));
+    border-bottom: 4px solid var(--base-color, #00a8f3);
+}
+
+/*noinspection CssInvalidPropertyValue, CssInvalidFunction*/
+@supports not (x: attr(x type(*))) {
+    nav.headernav {
+        border-bottom: 4px solid #00a8f3;
+    }
+}
+
+.breadcrumbs-list {
+    background-color: var(--backColor);
+    border-bottom: 4px solid var(--primaryColor);
+
+    > div {
+        width: 88%;
+        margin: auto;
+    }
+
+    ol {
+        width: fit-content;
+        margin: 0;
+        height: 2.5em;
+        max-width: 88%;
+        overflow-x: auto;
+        column-gap: 1ch;
+        min-width: 0;
+        padding: 2px;
+
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        list-style: none;
+        font-size: 0.9rem;
+        justify-content: flex-end;
+
+        > li {
+            display: flex;
+            align-items: center;
+            text-wrap: nowrap;
+            color: #555;
+
+            /* Link styles belong under 'li', not '::after' */
+
+            a {
+                text-decoration: none;
+
+                &:hover {
+                    text-decoration: underline;
+                }
+            }
+
+            /* Separator pseudo-element */
+
+            &:not(:last-child)::after {
+                content: ">";
+                margin: 0 0.5rem;
+                color: #888;
+            }
+
+            /* Active page style */
+
+            &[aria-current="page"] {
+                color: #222;
+                font-weight: 600;
+            }
+        }
+    }
+}
+
 .special-event-ventilation {
     aspect-ratio: 1200 / 800;
     max-height: 75vh;
@@ -114,4 +187,47 @@ nav.headernav {
     margin: auto;
     height: auto;
     width: auto;
+}
+
+
+/*noinspection CssInvalidFunction*/
+:root {
+    --primaryColor: attr(data-p type(<color>));
+    --secondaryColor: attr(data-s type(<color>));
+}
+
+/*noinspection CssInvalidPropertyValue, CssInvalidFunction*/
+@supports not (x: attr(x type(*))) {
+    :root {
+        --primaryColor: #00a8f3;
+        --secondaryColor: #0073a6;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bgColor: #000000;
+        --secondaryColor: #000000;
+    }
+}
+
+.bottom-divs {
+    height: 100vh;
+
+    & > :first-child {
+        & > :first-child {
+            height: 7vh;
+            border-bottom: 4px solid var(--primaryColor);
+
+            & + div {
+                height: 93vh;
+                background-color: #36393f;
+                background-image: linear-gradient(#2b2d32 5%, #36393f 12%, #36393f 100%);
+
+                & > :first-child {
+                    padding: 5vh;
+                }
+            }
+        }
+    }
 }

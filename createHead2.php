@@ -2,10 +2,8 @@
 
 use Color;
 use DateInterval;
-use Random\RandomException;
 use ContentSecurityPolicy\ContentSecurityPolicy;
 use function Helpers\htmlspecialchars12;
-use function Helpers\json_fromArray;
 
 require_once __DIR__ . "/Color.php";
 require_once __DIR__ . "/helpers.php";
@@ -20,6 +18,7 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
             'hiddenTopBar' => getFrom($user_options, 'hiddenTopBar', false) ? ' hidden' : '',
             'defaultCSP' => getFrom($user_options, 'defaultCSP', true),
             'ventHref' => getFrom($user_options, 'ventHref', false),
+            'linkarrays' => getFrom($user_options, 'bread', array()),
             'csp' => getFrom($user_options, 'csp'),
     ];
     ob_start();
@@ -51,6 +50,9 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
                 </svg>
             </a>
         </div>
+        <script type=application/json is=output-script><?= json_encode([
+                    '$options' => $options, '$user_options' => $user_options,
+            ], JSON_INVALID_UTF8_SUBSTITUTE) ?></script>
     </div>
     </div><?= "\n</div>";
     $bottom = $bottom . preg_replace('/\\s+/', ' ', ob_get_clean());
@@ -58,12 +60,12 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
 
     ob_start(function (string $string) use ($options, $bottom): string {
         if ($options['defaultCSP']) {
-            header("Content-Security-Policy: default-src 'self'; img-src 'self' blob:; script-src 'self' 'unsafe-inline'" .
-                    " https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js; style-src 'self' 'unsafe-inline'; object-src" .
-                    " 'none'; frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none';");
-            // header("Content-Security-Policy-Report-Only: default-src 'self'; img-src 'self' blob:; script-src 'self' " .
-            //"'sha384-df2iQaZF4qu/OgVkNSZQqLfqm4saLMMEaHCH8tzdu0JcIZ4VR3Y22rvlq6W1HOjX'; style-src 'self'; object-src 'none';" .
-            //" frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none'; form-action 'self'");
+            header("Content-Security-Policy: default-src 'self'; img-src 'self' blob:; script-src 'unsafe-inline'" .
+                    " 'self' https://keepandroidopen.org/banner.js; style-src 'self' 'unsafe-inline'; object-src 'none';" .
+                    " frame-ancestors 'none'; base-uri 'self'; upgrade-insecure-requests; font-src 'none'; frame-src 'none';");
+            header("Content-Security-Policy-Report-Only: default-src 'none'; img-src 'self' blob:; script-src 'self' " .
+                    "https://keepandroidopen.org/banner.js; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; " .
+                    "font-src 'none'; base-uri 'self'; frame-src 'none'; form-action 'self'");
         } elseif ($options['csp'] instanceof ContentSecurityPolicy || is_array($options['csp'])) {
             if ($options['csp'] instanceof ContentSecurityPolicy) $options['csp']->send(); else {
                 foreach ($options['csp'] as $csp) $csp->send();
@@ -85,12 +87,7 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     if (!empty($options['desc'])) {
         array_unshift($links, new ANTNavMetaTag('description', $options['desc']));
     }
-    echo "<!DOCTYPE html><html lang=\"{$options['lang']}\"><meta charset=UTF-8>" .
-            "<title>$title</title>$base\n<script type=importmap>$importmap" .
-            "</script><script src=/require/JSONScript.js type=module>" .
-            "</script>\n\n";
-
-    $nav = [];
+    $nav = array();
     $bgColor = '#0073a6';
     $borderColor = '#00a8f3';
     // tabs
@@ -118,6 +115,9 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     // $oldBorderColor=$borderColor;
     // $bgColor = '#a66d00';
     // $borderColor = '#fea700';
+    echo "<!DOCTYPE html><html lang=\"{$options['lang']}\" data-p=$borderColor data-s=$bgColor>" .
+            "<meta charset=UTF-8><title>$title</title>$base\n<script type=importmap>$importmap" .
+            "</script><script type=module src=/require/JSONScript.js></script>\n\n";
     array_unshift($links, new ANTNavLinkTag('stylesheet', '/require/head2/ANTStylesheet.css'));
     if (is_array($links)) {
         array_unshift($links, new ANTNavMetaTag('theme-color', "$bgColor"));
@@ -131,15 +131,21 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
             echo $link->toString();
         }
     }
-    echo new ANTNavIStyle(":root{--primaryColor:$borderColor;--secondaryColor:$bgColor;}")->toString();
-    echo "\n";
-    /** @noinspection JSUnresolvedLibraryURL */
-    /*echo "<script integrity='sha512-4V50NWjNLKBH60KkunQBWbMwv4pA5NIstr1F2Ossnb691knDWKYaHpGvS1bEyIupZnUnToVz5UQSZM/HIlj/tQ==' " .
-            "crossorigin=anonymous defer src=https://cdn.jsdelivr.net/npm/temporal-polyfill@0.3.0/global.min.js></script>";*/
-    echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>\n<script type=module"
-            . " src=/require/head2/import-v{$options['v']}.js></script></head><body>" .
-            "\n<nav class=headernav{$options['hiddenTopBar']}><div>\n" .
+    echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>" .
+            "<body>\n<nav class=headernav{$options['hiddenTopBar']}><div>\n" .
             implode("\n", $nav) . "\n</div></nav>";
+    if ($linkarrays = $options['linkarrays']) {
+        echo "<nav class=breadcrumbs-list><ol>";
+        foreach ($linkarrays as $arr) {
+            if (is_null($arr)) continue;
+            $text = htmlspecialchars12("{$arr['text']}");
+            $href = urlencode("{$arr['href']}");
+            echo "<li><a href=$href>$text</a>";
+        }
+        echo "</ol></nav>";
+    }
+    //echo "\n<div id=keepandroidopen></div><script crossorigin src='https://keepandroid" .
+    //        "open.org/banner.js?id=keepandroidopen&size=mini&&animation=off'></script>";
     echo "\n\n<!-- webpage-->\n\n";
     return array();
 }
@@ -396,59 +402,6 @@ readonly class ANTNavArbitraryHTML
     {
         return $this->toString();
     }
-}
-
-require_once __DIR__ . '/HashApi.php';
-
-/**
- * @param string $string
- * @return string
- * @deprecated
- */
-function sha256Base64(string $string): string
-{
-    return \HashApi\sha256Base64($string);
-}
-
-/**
- * @param string $string
- * @return string
- * @deprecated
- */
-function sha384Base64(string $string): string
-{
-    return \HashApi\sha384Base64($string);
-}
-
-/**
- * @param string $string
- * @return string
- * @deprecated
- */
-function sha512Base64(string $string): string
-{
-    return \HashApi\sha512Base64($string);
-}
-
-/**
- * @return string
- * @throws RandomException
- * @deprecated
- */
-function nonceBase64(): string
-{
-    return \HashApi\nonceBase64();
-}
-
-/**
- * @param string $string
- * @param bool $override
- * @return void
- * @deprecated
- */
-function sendHashApi(string $string, bool $override = false): void
-{
-    \HashApi\sendHashApi($string, $override);
 }
 
 function set_cookie(string $name, ?string $value, array $options, bool $send = true): bool|string
