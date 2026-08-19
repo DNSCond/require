@@ -74,8 +74,8 @@ function create_head3(string $title, array $user_options): void
     $base = !empty($options['base']) ? "<base href=\"{$options['base']}\">" : '<!--base/-->';
     echo "<!DOCTYPE html><html lang=\"{$options['lang']}\" data-p=$borderColor data-s=$bgColor>" .
             "<meta charset=UTF-8><title>$title</title>$base\n<script type=importmap>$importmap" .
-            "</script><script type=module src=/require/JSONScript.js></script>\n\n";
-    echo "<meta name=viewport content=width=device-width,initial-scale=1>";
+            "</script><script type=module src=/require/JSONScript.js></script>\n"
+            . "<meta name=viewport content='width=device-width,initial-scale=1'>";
     foreach (['/require/head2/ANTStylesheet.css', '/require/Nav.css'] as $stylelink) {
         echo "\n<link href=$stylelink rel=stylesheet>";
     }
@@ -84,10 +84,12 @@ function create_head3(string $title, array $user_options): void
         echo "\n<link href='$stylelink' rel=stylesheet>";
     }
 
+    /** @noinspection HtmlUnknownTarget */
     echo "\n<link rel=icon href=/favicon.ico>";
     if (is_string($options['desc'])) {
         $desc = htmlspecialchars12($options['desc']);
-        echo "\n<meta name=description content='$desc'>";}
+        echo "\n<meta name=description content='$desc'>";
+    }
 
     foreach ($options['metatags'] as $metatag) {
         if (is_null($metatag)) continue;
@@ -97,11 +99,11 @@ function create_head3(string $title, array $user_options): void
     }
 
     if ($canonical = getFrom($user_options, 'canonical'))
-        echo "<link href='$canonical' rel=canonical>";
+        echo "\n<link href='$canonical' rel=canonical>";
     $class = '"' . htmlspecialchars12(implode("\x20", $options['class'] ?? array())) . '"';
     /** @noinspection HtmlUnknownTarget */
     echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>";
-    echo "<body class=$class>\n<nav class=headernav><div>\n\n</div></nav>";
+    echo "\n<body class=$class><nav class=headernav><div>\n\n</div></nav>";
     if ($linkarrays = $options['linkarrays'] ?? array(['text' => 'ANTRequest.nl', 'href' => 'https://antrequest.nl/'])) {
         echo "<nav class=breadcrumbs-list><div><ol>";
         if (!is_null($arr = array_shift($linkarrays))) {
