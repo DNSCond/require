@@ -47,9 +47,6 @@ function create_head3(string $title, array $user_options): void
                 </svg>
             </a>
         </div>
-        <script type=application/json is=output-script><?= json_encode([
-                    '$options' => $options, '$user_options' => $user_options,
-            ], JSON_INVALID_UTF8_SUBSTITUTE) ?></script>
     </div>
     </div><?= "\n</div>";
     $bottom = $bottom . preg_replace('/\\s+/', ' ', ob_get_clean());
@@ -84,8 +81,13 @@ function create_head3(string $title, array $user_options): void
     }
     foreach ($options['stylelinks'] as $stylelink) {
         $stylelink = htmlspecialchars12($stylelink);
-        echo "\n<link href='$stylelink' rel=stylesheet>";}
+        echo "\n<link href='$stylelink' rel=stylesheet>";
+    }
 
+    echo "\n<link rel=icon href=/favicon.ico>";
+    if (is_string($options['desc'])) {
+        $desc = htmlspecialchars12($options['desc']);
+        echo "\n<meta name=description content='$desc'>";}
 
     foreach ($options['metatags'] as $metatag) {
         if (is_null($metatag)) continue;

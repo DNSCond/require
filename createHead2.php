@@ -103,7 +103,7 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
                 $selectionMade = true;
                 $borderColor = $navOption->borderColor;
                 $bgColor = $navOption->bgColor;
-                array_unshift($links, new ANTNavLinkTag('icon', $navOption->getURL()));
+                array_unshift($links, new ANTNavLinkTag('icon', '/favicon.ico', /*$navOption->getURL()*/));
             }
         }
     } elseif (empty($navOptions)) {
