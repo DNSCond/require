@@ -231,3 +231,9 @@ nav.headernav {
         }
     }
 }
+
+/*noinspection CssInvalidFunction,CssInvalidPropertyValue*/
+antnav-option {
+    border-color: attr(data-o type(<color>));
+    background-color: attr(data-b type(<color>));
+}

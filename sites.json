@@ -1,0 +1,12 @@
+[
+  {
+    "backgColor": "#0073a6",
+    "primColor": "#00a8f3",
+    "title": "ANTRequest Gallery",
+    "favicon": "/favicon.ico",
+    "href": "https://antrequest.nl",
+    "w": 200,
+    "h": 200,
+    "this": true
+  }
+]

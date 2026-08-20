@@ -1,7 +1,6 @@
 <?php namespace ANTHeader;
 
 use function Helpers\htmlspecialchars12;
-use function Helpers\sha256;
 
 require_once __DIR__ . "/../helpers.php";
 function create_head3(string $title, array $user_options): void
@@ -47,6 +46,8 @@ function create_head3(string $title, array $user_options): void
                 </svg>
             </a>
         </div>
+        <script type=application/json is=output-script
+                data-point><?= json_encode(array(), JSON_INVALID_UTF8_SUBSTITUTE) ?></script>
     </div>
     </div><?= "\n</div>";
     $bottom = $bottom . preg_replace('/\\s+/', ' ', ob_get_clean());
@@ -98,12 +99,25 @@ function create_head3(string $title, array $user_options): void
         echo "\n<meta name='$name' content='$cont'>";
     }
 
+    $links = array();
     if ($canonical = getFrom($user_options, 'canonical'))
         echo "\n<link href='$canonical' rel=canonical>";
     $class = '"' . htmlspecialchars12(implode("\x20", $options['class'] ?? array())) . '"';
+    if ($linkout = file_get_contents(__DIR__ . '/../sites.json')) {
+        if ($linkout = json_decode($linkout, true)) {
+            foreach ($linkout as $linky) {
+                $alt = htmlspecialchars12($linky['title'] ?? '');
+                $outline = $linky['primColor'];
+                $back = $linky['backgColor'];
+                $links[] = "<antnav-option data-o=$outline data-b=$back><a href='{$linky['href']}'><img"
+                        . " src='{$linky['favicon']}' alt='$alt' width=512 height=512></a></antnav-option>";
+            }
+        }
+    }
+
     /** @noinspection HtmlUnknownTarget */
-    echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>";
-    echo "\n<body class=$class><nav class=headernav><div>\n\n</div></nav>";
+    echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>\n<body class=$class>";
+    echo "<nav class=headernav><div>\n" . implode('', $links) . "\n</div></nav>";
     if ($linkarrays = $options['linkarrays'] ?? array(['text' => 'ANTRequest.nl', 'href' => 'https://antrequest.nl/'])) {
         echo "<nav class=breadcrumbs-list><div><ol>";
         if (!is_null($arr = array_shift($linkarrays))) {

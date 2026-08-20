@@ -20,13 +20,14 @@ function cbyte($num): string
 
 function htmlspecialchars12(string $value): string
 {
-    $html = str_replace('"', '&quot;',
-        str_replace('>', '&gt;',
-            str_replace('<', '&lt;',
-                str_replace('\'', '&#39;',
-                    str_replace('&', '&amp;',
-                        "$value")))));
-    return ($html);
+    return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
+    //$html = str_replace('"', '&quot;',
+    //str_replace('>', '&gt;',
+    //str_replace('<', '&lt;',
+    //str_replace('\'', '&#39;',
+    //str_replace('&', '&amp;',
+    //"$value")))));
+    //return ($html);
 }
 
 function json_fromArray(mixed $json, bool|int $JSON_PRETTY_PRINT = true): false|string
