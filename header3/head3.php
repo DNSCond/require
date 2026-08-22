@@ -34,7 +34,7 @@ function create_head3(string $title, array $user_options): void
                 <svg width="1280" height="800" viewBox="0 0 1280 800"
                      xmlns="http://www.w3.org/2000/svg" class="special-event-ventilation">
                     <rect x="0" y="0" width="1280" height="800" fill="darkgray"/>
-                    <g><?= '<=!-- (' . ($ventStatus_VentOn ? 'On' : 'Off') . ') --=>';
+                    <g><?= '<!-- (' . ($ventStatus_VentOn ? 'On' : 'Off') . ') -->';
                         $ventColorL = ($ventStatus_VentOn ? '#fd9455' : '#36393f');
                         $ventColorD = ($ventStatus_VentOn ? '#fc6912' : '#36393f');
                         $attrs = 'stroke=gray stroke-width=16 paint-order=\'stroke\'';
@@ -46,8 +46,6 @@ function create_head3(string $title, array $user_options): void
                 </svg>
             </a>
         </div>
-        <script type=application/json is=output-script
-                data-point><?= json_encode(array(), JSON_INVALID_UTF8_SUBSTITUTE) ?></script>
     </div>
     </div><?= "\n</div>";
     $bottom = $bottom . preg_replace('/\\s+/', ' ', ob_get_clean());
@@ -57,8 +55,8 @@ function create_head3(string $title, array $user_options): void
     ]);
     $importHash = 'sha256-' . base64_encode(hash('sha256', $importmap, true));
     header("Content-Security-Policy: default-src 'none'; img-src 'self' blob:; style-src 'self'; " .
-            "script-src 'self' https://keepandroidopen.org/banner.js '$importHash'; frame-ancestors 'none'; " .
-            "base-uri 'self'; font-src 'none'; upgrade-insecure-requests; frame-src 'none'; form-action 'self'");
+            "script-src 'self' '$importHash'; frame-ancestors 'none'; upgrade-insecure-requests; " .
+            "base-uri 'self'; font-src 'none'; frame-src 'none'; form-action 'self'");
     ob_start(function (string $string) use ($bottom): string {
         return "$string$bottom\n";
     });
@@ -97,7 +95,7 @@ function create_head3(string $title, array $user_options): void
         $name = htmlspecialchars12($metatag[0]);
         $cont = htmlspecialchars12($metatag[1]);
         echo "\n<meta name='$name' content='$cont'>";
-    }
+    } echo "<meta name=theme-color content=$bgColor>"; // $borderColor>
 
     $links = array();
     if ($canonical = getFrom($user_options, 'canonical'))
@@ -123,7 +121,7 @@ function create_head3(string $title, array $user_options): void
         if (!is_null($arr = array_shift($linkarrays))) {
             $text = htmlspecialchars12("{$arr['text']}");
             $href = htmlspecialchars12("{$arr['href']}");
-            echo "\n<li><a href='$href' aria-current=page>$text</a>";
+            echo "<li><a href='$href' aria-current=page>$text</a>";
         }
         foreach ($linkarrays as $arr) {
             if (is_null($arr)) continue;
