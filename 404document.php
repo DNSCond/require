@@ -1,8 +1,8 @@
 <?php use ANTHeader\ANTNavOption;
 use function ANTHeader\ANTNavFavicond;
-use function ANTHeader\create_head2;
+use function ANTHeader\create_head3;
 
-require_once "{$_SERVER['DOCUMENT_ROOT']}/require/createHead2.php";
+require_once "{$_SERVER['DOCUMENT_ROOT']}/require/header3/head3.php";
 $http_RedirectStatus = (int)(array_key_exists('REDIRECT_STATUS', $_SERVER) ? "{$_SERVER["REDIRECT_STATUS"]}" : '');
 function http_RedirectStatus(int $status, string $h1, string $p): array
 {
@@ -16,12 +16,10 @@ function http_RedirectStatus(int $status, string $h1, string $p): array
     default => ['???', '????: unknown Redirect status', 'we had not anticipated you getting so far. so?'],
 };
 http_response_code($http_RedirectStatus);
-create_head2($title, ['base' => '/',
-], [], [
-        ANTNavFavicond('https://ANTRequest.nl', $title, false),
-        new ANTNavOption('/',
-                '/dollmaker2/icon/endpoint.php?bgcolor=%23000000&fgcolor=%2300ff00&L=%2300ff00&W=%23000000&LC=%2300ff00&RC=%2300ff00&accessory=lightbar',
-                'void ANT', new Color('00a600'), new Color('00ff00'), true),
+create_head3($title, ['base' => '/', 'bread' => [
+                array('text' => 'Favicond\'s Character Gallery', 'href' => 'https://ANTRequest.nl'),
+                array('text' => 'Not Found + 404', 'href' => '/'),
+        ],
 ]) ?>
 <div class=divs>
     <h1><?= $title ?></h1>

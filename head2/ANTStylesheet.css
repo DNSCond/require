@@ -165,7 +165,7 @@ nav.headernav {
 
             &:not(:last-child)::after {
                 content: ">";
-                margin: 0 0.5rem;
+                margin: 0 0 0 0.5rem;
                 color: #888;
             }
 
