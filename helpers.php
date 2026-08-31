@@ -121,5 +121,5 @@ function base64UrlEncode(string $data): string
 function base64UrlDecode(string $data): string
 {
     if (str_contains($data, '/') || str_contains($data, '+')) return false;
-    return base64_decode(strtr($data, '-_', '+/') . str_repeat('=', 3 - (3 + strlen($data)) % 4));
+    return base64_decode(strtr($data, '-_', '+/') . str_repeat('=', 3 - (3 + strlen($data)) % 4), true);
 }
