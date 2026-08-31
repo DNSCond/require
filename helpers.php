@@ -21,13 +21,9 @@ function cbyte($num): string
 function htmlspecialchars12(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
-    //$html = str_replace('"', '&quot;',
-    //str_replace('>', '&gt;',
-    //str_replace('<', '&lt;',
-    //str_replace('\'', '&#39;',
-    //str_replace('&', '&amp;',
-    //"$value")))));
-    //return ($html);
+    //$html = str_replace('"', '&quot;', str_replace('>', '&gt;',
+    //str_replace('<', '&lt;', str_replace('\'', '&#39;',
+    //str_replace('&', '&amp;', "$value"))))); return ($html);
 }
 
 function json_fromArray(mixed $json, bool|int $JSON_PRETTY_PRINT = true): false|string
@@ -113,4 +109,17 @@ function getQualityFactor(string $mime, array $acceptableTypes): float
 
     // Check if the mime type is in the acceptable types array
     return in_array($mime, $acceptableTypes) ? $q : 0.0;
+}
+
+namespace Helpers\Base64Url;
+
+function base64UrlEncode(string $data): string
+{
+    return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+}
+
+function base64UrlDecode(string $data): string
+{
+    if (str_contains($data, '/') || str_contains($data, '+')) return false;
+    return base64_decode(strtr($data, '-_', '+/') . str_repeat('=', 3 - (3 + strlen($data)) % 4));
 }

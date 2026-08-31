@@ -17,6 +17,7 @@ function create_head3(string $title, array $user_options): void
             'stylelinks' => getFrom($user_options, 'stylelinks', array()),
             'metatags' => getFrom($user_options, 'metatags', array()),
             'linktags' => getFrom($user_options, 'linktags', array()),
+            'cspConnectAllowed' => getFrom($user_options, 'cspConnectAllowed', array()),
     ];
     ob_start();
     $ventStatus_VentOn = false;
@@ -50,13 +51,15 @@ function create_head3(string $title, array $user_options): void
     </div><?= "\n</div>";
     $bottom = $bottom . preg_replace('/\\s+/', ' ', ob_get_clean());
     $bottom = str_replace('> <', ">\n<", $bottom);
-    $importmap = json_encode([
-            'imports' => new \stdClass,
-    ]);
+    $conn = '';
+    if (is_array($options['cspConnectAllowed'])) {
+        $conn = 'connect-src ' . implode(' ', $options['cspConnectAllowed']);
+    }
+    $importmap = json_encode(['imports' => new \stdClass]);
     $importHash = 'sha256-' . base64_encode(hash('sha256', $importmap, true));
     header("Content-Security-Policy: default-src 'none'; img-src 'self' blob:; style-src 'self'; " .
             "script-src 'self' '$importHash'; frame-ancestors 'none'; upgrade-insecure-requests; " .
-            "base-uri 'self'; font-src 'none'; frame-src 'none'; form-action 'self'");
+            "base-uri 'self'; font-src 'none'; frame-src 'none'; form-action 'self';$conn;");
     ob_start(function (string $string) use ($bottom): string {
         return "$string$bottom\n";
     });
@@ -95,7 +98,8 @@ function create_head3(string $title, array $user_options): void
         $name = htmlspecialchars12($metatag[0]);
         $cont = htmlspecialchars12($metatag[1]);
         echo "\n<meta name='$name' content='$cont'>";
-    } echo "<meta name=theme-color content=$bgColor>"; // $borderColor>
+    }
+    echo "<meta name=theme-color content=$bgColor>"; // $borderColor>
 
     $links = array();
     if ($canonical = getFrom($user_options, 'canonical'))
