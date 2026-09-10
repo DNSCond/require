@@ -76,7 +76,6 @@ nav.headernav {
     background-color: currentColor;
     box-sizing: content-box;
     height: calc(4.4em + 4px);
-    /*border-bottom: 4px solid var(--primaryColor);*/
 
     > div {
         display: flex;
@@ -104,11 +103,9 @@ nav.headernav {
             }
         }
     }
-}
 
-nav.headernav {
     /*noinspection CssInvalidFunction*/
-    --base-color: attr(data-base-color type(< color >));
+    --base-color: attr(data-base-color type(<color>));
     border-bottom: 4px solid var(--base-color, #00a8f3);
 }
 

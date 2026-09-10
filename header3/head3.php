@@ -18,6 +18,8 @@ function create_head3(string $title, array $user_options): void
             'metatags' => getFrom($user_options, 'metatags', array()),
             'linktags' => getFrom($user_options, 'linktags', array()),
             'cspConnectAllowed' => getFrom($user_options, 'cspConnectAllowed', array()),
+            'noVent' => getFrom($user_options, 'noVent', false),
+            'siteOverride' => getFrom($user_options, 'siteOverride'),
     ];
     ob_start();
     $ventStatus_VentOn = false;
@@ -26,29 +28,31 @@ function create_head3(string $title, array $user_options): void
     if (is_string($options['ventHref'])) {
         $ventStatus_VentOn = true;
         $ventHref = $options['ventHref'];
-    } ?>
-    <div class=empty>
-    <div></div>
-    <div>
+    }
+    if (!$options['noVent']): ?>
+        <div class=empty>
+        <div></div>
         <div>
-            <a href="<?= $ventHref ?>">
-                <svg width="1280" height="800" viewBox="0 0 1280 800"
-                     xmlns="http://www.w3.org/2000/svg" class="special-event-ventilation">
-                    <rect x="0" y="0" width="1280" height="800" fill="darkgray"/>
-                    <g><?= '<!-- (' . ($ventStatus_VentOn ? 'On' : 'Off') . ') -->';
-                        $ventColorL = ($ventStatus_VentOn ? '#fd9455' : '#36393f');
-                        $ventColorD = ($ventStatus_VentOn ? '#fc6912' : '#36393f');
-                        $attrs = 'stroke=gray stroke-width=16 paint-order=\'stroke\'';
-                        for ($i = 0; $i < 6; $i++) {
-                            $j = $i * 200 + 100;
-                            echo "<rect x=$j y=80  width=80 height=640 fill='$ventColorL' $attrs/>" .
-                                    "<rect x=$j y=550 width=80 height=170 fill='$ventColorD'/>\x20";
-                        } ?></g>
-                </svg>
-            </a>
+            <div>
+                <a href="<?= $ventHref ?>">
+                    <svg width="1280" height="800" viewBox="0 0 1280 800"
+                         xmlns="http://www.w3.org/2000/svg" class="special-event-ventilation">
+                        <rect x="0" y="0" width="1280" height="800" fill="darkgray"/>
+                        <g><?= '<!-- (' . ($ventStatus_VentOn ? 'On' : 'Off') . ') -->';
+                            $ventColorL = ($ventStatus_VentOn ? '#fd9455' : '#36393f');
+                            $ventColorD = ($ventStatus_VentOn ? '#fc6912' : '#36393f');
+                            $attrs = 'stroke=gray stroke-width=16 paint-order=\'stroke\'';
+                            for ($i = 0; $i < 6; $i++) {
+                                $j = $i * 200 + 100;
+                                echo "<rect x=$j y=80  width=80 height=640 fill='$ventColorL' $attrs/>" .
+                                        "<rect x=$j y=550 width=80 height=170 fill='$ventColorD'/>\x20";
+                            } ?></g>
+                    </svg>
+                </a>
+            </div>
         </div>
-    </div>
-    </div><?= "\n</div>";
+        </div><?= "\n</div>";
+    else: echo "</div>"; endif;
     $bottom = $bottom . preg_replace('/\\s+/', ' ', ob_get_clean());
     $bottom = str_replace('> <', ">\n<", $bottom);
     $conn = '';
@@ -102,6 +106,7 @@ function create_head3(string $title, array $user_options): void
     echo "<meta name=theme-color content=$bgColor>"; // $borderColor>
 
     $links = array();
+    $baseColor = '';
     if ($canonical = getFrom($user_options, 'canonical'))
         echo "\n<link href='$canonical' rel=canonical>";
     $class = '"' . htmlspecialchars12(implode("\x20", $options['class'] ?? array())) . '"';
@@ -111,15 +116,20 @@ function create_head3(string $title, array $user_options): void
                 $alt = htmlspecialchars12($linky['title'] ?? '');
                 $outline = $linky['primColor'];
                 $back = $linky['backgColor'];
-                $links[] = "<antnav-option data-o=$outline data-b=$back><a href='{$linky['href']}'><img"
-                        . " src='{$linky['favicon']}' alt='$alt' width=512 height=512></a></antnav-option>";
+                if (is_string($options['siteOverride'])) {
+                    $isThis = $options['siteOverride'] === $linky['href'];
+                } else $isThis = $linky['this'];
+                if ($isThis) $baseColor = "data-base-color=$outline";
+                $out = ($isThis ? "data-o=$outline data-b=$back" : '');
+                $links[] = "<antnav-option $out><a href='{$linky['href']}'><img alt='$alt' "
+                        . "src='{$linky['favicon']}' width=512 height=512></a></antnav-option>";
             }
         }
     }
 
     /** @noinspection HtmlUnknownTarget */
     echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>\n<body class=$class>";
-    echo "<nav class=headernav><div>\n" . implode('', $links) . "\n</div></nav>";
+    echo "<nav class=headernav $baseColor><div>\n" . implode('', $links) . "\n</div></nav>";
     if ($linkarrays = $options['linkarrays'] ?? array(['text' => 'ANTRequest.nl', 'href' => 'https://antrequest.nl/'])) {
         echo "<nav class=breadcrumbs-list><div><ol>";
         if (!is_null($arr = array_shift($linkarrays))) {
@@ -135,6 +145,7 @@ function create_head3(string $title, array $user_options): void
         }
         echo "</ol></div></nav>";
     }
+    echo "\n<!-- WebPage -->\n\n";
 }
 
 function getFrom(array $array, string|int $property, mixed $default = null): mixed

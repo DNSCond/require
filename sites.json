@@ -5,8 +5,18 @@
     "title": "ANTRequest Gallery",
     "favicon": "/favicon.ico",
     "href": "https://antrequest.nl",
+    "this": true,
     "w": 200,
-    "h": 200,
-    "this": true
+    "h": 200
+  },
+  {
+    "backgColor": "#a62c00",
+    "primColor": "#ff4500",
+    "title": "ANTRequest Gallery",
+    "favicon": "/favicon.ico",
+    "href": "https://dnscond.github.io",
+    "this": false,
+    "w": 200,
+    "h": 200
   }
 ]
