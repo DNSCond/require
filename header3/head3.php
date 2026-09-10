@@ -18,9 +18,16 @@ function create_head3(string $title, array $user_options): void
             'metatags' => getFrom($user_options, 'metatags', array()),
             'linktags' => getFrom($user_options, 'linktags', array()),
             'cspConnectAllowed' => getFrom($user_options, 'cspConnectAllowed', array()),
+            'localhostIconOverride' => getFrom($user_options, 'localhostIconOverride'),
             'noVent' => getFrom($user_options, 'noVent', false),
             'siteOverride' => getFrom($user_options, 'siteOverride'),
     ];
+    $iconPath = '/favicon.ico';
+    $devHostFile = '../../devhost.txt';
+    if (is_string($options['localhostIconOverride'])) {
+        $isDevHost = file_exists($devHostFile) && file_get_contents($devHostFile) === 'DevHost';
+        if ($isDevHost) $iconPath = $options['localhostIconOverride'];
+    }
     ob_start();
     $ventStatus_VentOn = false;
     $bottom = "<div class=bottom-divs>";
@@ -67,6 +74,30 @@ function create_head3(string $title, array $user_options): void
     ob_start(function (string $string) use ($bottom): string {
         return "$string$bottom\n";
     });
+    $baseColor = '';
+    $links = array();
+    $afterTitle = '[[Unknown]]';
+    if ($linkout = file_get_contents(__DIR__ . '/../sites.json')) {
+        if ($linkout = json_decode($linkout, true)) {
+            foreach ($linkout as $linky) {
+                $alt = htmlspecialchars12($linky['title'] ?? '');
+                $outline = $linky['primColor'];
+                $back = $linky['backgColor'];
+                if (is_string($options['siteOverride'])) {
+                    $isThis = $options['siteOverride'] === $linky['href'];
+                } else $isThis = $linky['this'];
+                if ($isThis) {
+                    $favicon = $iconPath;
+                    $baseColor = "data-base-color=$outline";
+                    $afterTitle = $linky['afterTitle'];
+                } else $favicon = "{$linky['favicon']}";
+                $out = ($isThis ? "data-o=$outline data-b=$back" : '');
+                $links[] = "<antnav-option $out><a href='{$linky['href']}'><img alt='$alt'"
+                        . " src='$favicon' width=512 height=512></a></antnav-option>";
+            }
+        }
+    }
+
     $bgColor = '#0073a6';
     $borderColor = '#00a8f3';
     if (array_key_exists('borderColor', $options) &&
@@ -76,7 +107,7 @@ function create_head3(string $title, array $user_options): void
                     $matches)) {
         [, $borderColor, $bgColor] = $matches;
     }
-    $title = htmlspecialchars12("$title (ANTRequest.nl)");
+    $title = htmlspecialchars12("$title ($afterTitle)");
     $base = !empty($options['base']) ? "<base href=\"{$options['base']}\">" : '<!--base/-->';
     echo "<!DOCTYPE html><html lang=\"{$options['lang']}\" data-p=$borderColor data-s=$bgColor>" .
             "<meta charset=UTF-8><title>$title</title>$base\n<script type=importmap>$importmap" .
@@ -91,7 +122,7 @@ function create_head3(string $title, array $user_options): void
     }
 
     /** @noinspection HtmlUnknownTarget */
-    echo "\n<link rel=icon href=/favicon.ico>";
+    echo "\n<link rel=icon href=$iconPath>";
     if (is_string($options['desc'])) {
         $desc = htmlspecialchars12($options['desc']);
         echo "\n<meta name=description content='$desc'>";
@@ -104,28 +135,9 @@ function create_head3(string $title, array $user_options): void
         echo "\n<meta name='$name' content='$cont'>";
     }
     echo "<meta name=theme-color content=$bgColor>"; // $borderColor>
-
-    $links = array();
-    $baseColor = '';
     if ($canonical = getFrom($user_options, 'canonical'))
         echo "\n<link href='$canonical' rel=canonical>";
     $class = '"' . htmlspecialchars12(implode("\x20", $options['class'] ?? array())) . '"';
-    if ($linkout = file_get_contents(__DIR__ . '/../sites.json')) {
-        if ($linkout = json_decode($linkout, true)) {
-            foreach ($linkout as $linky) {
-                $alt = htmlspecialchars12($linky['title'] ?? '');
-                $outline = $linky['primColor'];
-                $back = $linky['backgColor'];
-                if (is_string($options['siteOverride'])) {
-                    $isThis = $options['siteOverride'] === $linky['href'];
-                } else $isThis = $linky['this'];
-                if ($isThis) $baseColor = "data-base-color=$outline";
-                $out = ($isThis ? "data-o=$outline data-b=$back" : '');
-                $links[] = "<antnav-option $out><a href='{$linky['href']}'><img alt='$alt' "
-                        . "src='{$linky['favicon']}' width=512 height=512></a></antnav-option>";
-            }
-        }
-    }
 
     /** @noinspection HtmlUnknownTarget */
     echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>\n<body class=$class>";
