@@ -4,7 +4,7 @@
     "primColor": "#00a8f3",
     "title": "ANTRequest Gallery",
     "afterTitle": "ANTRequest.nl",
-    "favicon": "/favicon.ico",
+    "favicon": "/gallery/favicon.ico",
     "href": "https://antrequest.nl",
     "this": true,
     "w": 200,

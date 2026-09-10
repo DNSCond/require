@@ -26,7 +26,7 @@ function create_head3(string $title, array $user_options): void
     $devHostFile = '../../devhost.txt';
     if (is_string($options['localhostIconOverride'])) {
         $isDevHost = file_exists($devHostFile) && file_get_contents($devHostFile) === 'DevHost';
-        if ($isDevHost) $iconPath = $options['localhostIconOverride'];
+        if ($isDevHost && !array_key_exists('isntLocalhost', $_GET)) $iconPath = $options['localhostIconOverride'];
     }
     ob_start();
     $ventStatus_VentOn = false;
