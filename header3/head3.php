@@ -23,7 +23,8 @@ function create_head3(string $title, array $user_options): void
             'siteOverride' => getFrom($user_options, 'siteOverride'),
     ];
     $iconPath = '/favicon.ico';
-    $devHostFile = '../../devhost.txt';
+    $devHostFile = __DIR__ . '/../../../devhost.txt';
+    header('__DIR__:' . __DIR__);
     if (is_string($options['localhostIconOverride'])) {
         $isDevHost = file_exists($devHostFile) && file_get_contents($devHostFile) === 'DevHost';
         if ($isDevHost && !array_key_exists('isntLocalhost', $_GET)) $iconPath = $options['localhostIconOverride'];
