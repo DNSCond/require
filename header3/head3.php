@@ -92,8 +92,8 @@ function create_head3(string $title, array $user_options): void
                     $afterTitle = $linky['afterTitle'];
                 } else $favicon = "{$linky['favicon']}";
                 $out = ($isThis ? "data-o=$outline data-b=$back" : '');
-                $links[] = "<antnav-option $out><a href='{$linky['href']}'><img alt='$alt'"
-                        . " src='$favicon' width=512 height=512></a></antnav-option>";
+                $links[] = "<antnav-option $out><a href='{$linky['href']}'><img src='$favicon' alt"
+                        . "='$alt' width={$linky['w']} height={$linky['h']}></a></antnav-option>";
             }
         }
     }
