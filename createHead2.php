@@ -118,7 +118,7 @@ function create_head2(string $title, array $user_options, ?array $links = null, 
     echo "<!DOCTYPE html><html lang=\"{$options['lang']}\" data-p=$borderColor data-s=$bgColor>" .
             "<meta charset=UTF-8><title>$title</title>$base\n<script type=importmap>$importmap" .
             "</script><script type=module src=/require/JSONScript.js></script>\n\n";
-    array_unshift($links, new ANTNavLinkTag('stylesheet', '/require/head2/ANTStylesheet.css'));
+    array_unshift($links, new ANTNavLinkTag('stylesheet', '/require/header3/ANTStylesheet.css'));
     if (is_array($links)) {
         array_unshift($links, new ANTNavMetaTag('theme-color', "$bgColor"));
         foreach ($links as $link) {

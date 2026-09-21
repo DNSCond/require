@@ -17,10 +17,11 @@ function create_head3(string $title, array $user_options): void
             'stylelinks' => getFrom($user_options, 'stylelinks', array()),
             'metatags' => getFrom($user_options, 'metatags', array()),
             'linktags' => getFrom($user_options, 'linktags', array()),
-            'cspConnectAllowed' => getFrom($user_options, 'cspConnectAllowed', array()),
+            'cspConnectAllowed' => getFrom($user_options, 'cspConnectAllowed'),
             'localhostIconOverride' => getFrom($user_options, 'localhostIconOverride'),
             'noVent' => getFrom($user_options, 'noVent', false),
             'siteOverride' => getFrom($user_options, 'siteOverride'),
+            'nightLightOverride' => getFrom($user_options, 'nightLightOverride', false),
     ];
     $iconPath = '/favicon.ico';
     $devHostFile = __DIR__ . '/../../../devhost.txt';
@@ -61,16 +62,15 @@ function create_head3(string $title, array $user_options): void
         </div><?= "\n</div>";
     else: echo "</div>"; endif;
     $bottom = $bottom . preg_replace('/\\s+/', ' ', ob_get_clean());
-    $bottom = str_replace('> <', ">\n<", $bottom);
-    $conn = '';
-    if (is_array($options['cspConnectAllowed'])) {
-        $conn = 'connect-src ' . implode(' ', $options['cspConnectAllowed']);
-    }
+    $bottom = str_replace('> <', "><", $bottom);
+    $conn = "\x20connect-src\x20";
+    if (is_array($options['cspConnectAllowed']))
+        $conn .= implode("\x20", $options['cspConnectAllowed']);
     $importmap = json_encode(['imports' => new \stdClass]);
     $importHash = 'sha256-' . base64_encode(hash('sha256', $importmap, true));
-    header("Content-Security-Policy: default-src 'none'; img-src 'self' blob:; style-src 'self'; " .
-            "script-src 'self' '$importHash'; frame-ancestors 'none'; upgrade-insecure-requests; " .
-            "base-uri 'self'; font-src 'none'; frame-src 'none'; form-action 'self';$conn;");
+    header("Content-Security-Policy: default-src 'none'; img-src 'self' blob:; style-src 'self';"
+            . " script-src 'self' '$importHash'; frame-ancestors 'none'; upgrade-insecure-requests;" .
+            " base-uri 'self'; font-src 'none'; frame-src 'none'; form-action 'self';$conn;");
     ob_start(function (string $string) use ($bottom): string {
         return "$string$bottom\n";
     });
@@ -97,11 +97,10 @@ function create_head3(string $title, array $user_options): void
             }
         }
     }
-
     $bgColor = '#0073a6';
     $borderColor = '#00a8f3';
-    if (array_key_exists('borderColor', $options) &&
-            array_key_exists('backColor', $options)
+    if (array_key_exists('borderColor', $options)
+            && array_key_exists('backColor', $options)
             && preg_match('/^(#?[a-fA-F0-9]{6}),(#?[a-fA-F0-9]{6})$/D',
                     "{$options['borderColor']},{$options['backColor']}",
                     $matches)) {
@@ -113,9 +112,13 @@ function create_head3(string $title, array $user_options): void
             "<meta charset=UTF-8><title>$title</title>$base\n<script type=importmap>$importmap" .
             "</script><script type=module src=/require/JSONScript.js></script>\n"
             . "<meta name=viewport content='width=device-width,initial-scale=1'>";
-    foreach (['/require/head2/ANTStylesheet.css', '/require/Nav.css'] as $stylelink) {
+    foreach (['/require/header3/ANTStylesheet.css', '/require/Nav.css'] as $stylelink)
         echo "\n<link href=$stylelink rel=stylesheet>";
-    }
+
+    $night = (int)(bool)$options['nightLightOverride'];
+    /** @noinspection HtmlUnknownTarget */
+    echo "\n<link href=/require/header3/nightLight.css.php?n=$night rel=stylesheet>";
+
     foreach ($options['stylelinks'] as $stylelink) {
         $stylelink = htmlspecialchars12($stylelink);
         echo "\n<link href='$stylelink' rel=stylesheet>";
