@@ -77,6 +77,7 @@ function create_head3(string $title, array $user_options): void
     $baseColor = '';
     $links = array();
     $afterTitle = '[[Unknown]]';
+    $origin = null;
     if ($linkout = file_get_contents(__DIR__ . '/../sites.json')) {
         if ($linkout = json_decode($linkout, true)) {
             foreach ($linkout as $linky) {
@@ -90,6 +91,7 @@ function create_head3(string $title, array $user_options): void
                     $favicon = $iconPath;
                     $baseColor = "data-base-color=$outline";
                     $afterTitle = $linky['afterTitle'];
+                    $origin = $linky['href'];
                 } else $favicon = "{$linky['favicon']}";
                 $out = ($isThis ? "data-o=$outline data-b=$back" : '');
                 $links[] = "<antnav-option $out><a href='{$linky['href']}'><img src='$favicon' alt"
@@ -117,7 +119,7 @@ function create_head3(string $title, array $user_options): void
 
     $night = (int)(bool)$options['nightLightOverride'];
     /** @noinspection HtmlUnknownTarget */
-    echo "\n<link href=/require/header3/nightLight.css.php?n=$night rel=stylesheet>";
+    echo "\n<link href='/require/header3/nightLight.css.php?n=$night' rel=stylesheet>";
 
     foreach ($options['stylelinks'] as $stylelink) {
         $stylelink = htmlspecialchars12($stylelink);
@@ -138,8 +140,16 @@ function create_head3(string $title, array $user_options): void
         echo "\n<meta name='$name' content='$cont'>";
     }
     echo "<meta name=theme-color content=$bgColor>"; // $borderColor>
-    if ($canonical = getFrom($user_options, 'canonical'))
-        echo "\n<link href='$canonical' rel=canonical>";
+    if ($origin) {
+        if ($canonical = getFrom($user_options, 'canonical')) {
+            /** @noinspection PhpFullyQualifiedNameUsageInspection, PhpUnhandledExceptionInspection */
+            $canonical = \Uri\WhatWg\Url::parse($canonical, new \Uri\WhatWg\Url($origin))->toAsciiString();
+            echo "\n<link href='$canonical' rel=canonical>";
+        }
+    } else {
+        echo '<!-- failure to set canonical, origin not available -->';
+    }
+
     $class = '"' . htmlspecialchars12(implode("\x20", $options['class'] ?? array())) . '"';
 
     /** @noinspection HtmlUnknownTarget */
