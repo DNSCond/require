@@ -1,0 +1,31 @@
+# to be put in root
+Options -Indexes +FollowSymLinks
+RewriteEngine On
+RewriteBase /
+
+ErrorDocument 403 /require/403document.php
+
+RedirectMatch 307 ^/gallery/favicon\.ico$ /favicon.ico
+
+RewriteRule ^favicon\.ico$ favicond.png [L,NC,R=307]
+RewriteRule ^favicon\.gif$ favicon.ico [L,NC,R=307]
+
+Header always set X-Content-Type-Options nosniff
+Header set Cross-Origin-Opener-Policy same-origin
+Header set Cross-Origin-Embedder-Policy credentialless
+Header set Cross-Origin-Resource-Policy same-origin
+Header set Referrer-Policy same-origin
+
+RewriteRule ^comics/?$ /gallery/comics/index.php [L,QSA]
+RewriteRule ^comics/([a-zA-Z0-9\\-]+)/(\d+)/?$ gallery/comics/comicPage.php?titleURL=$1&episodeId=$2 [L,QSA]
+
+Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+AddType text/plain .ts
+
+DirectoryIndex index.php index.html
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+RewriteRule ^(.*)$ /require/404document.php?path=$1 [L,QSA]
