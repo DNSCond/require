@@ -1,6 +1,7 @@
 <?php namespace ANTHeader;
 
 use function Helpers\htmlspecialchars12;
+use function Helpers\toDataSet;
 
 require_once __DIR__ . "/../helpers.php";
 function create_head3(string $title, array $user_options): void
@@ -30,13 +31,14 @@ function create_head3(string $title, array $user_options): void
         if ($isDevHost && !array_key_exists('isntLocalhost', $_GET)) $iconPath = $options['localhostIconOverride'];
     }
     ob_start();
+    $ventHref = '/';
     $ventStatus_VentOn = false;
     $bottom = "<div class=bottom-divs>";
-    $ventHref = '/gallery/char/window';
     if (is_string($options['ventHref'])) {
-        $ventStatus_VentOn = true;
         $ventHref = $options['ventHref'];
+        $ventStatus_VentOn = true;
     }
+    $ventStatus_VentOn = $ventStatus_VentOn || gmdate('m') === '12';
     if (!$options['noVent']): ?>
         <div class=empty>
         <div></div>
@@ -68,16 +70,15 @@ function create_head3(string $title, array $user_options): void
         $conn .= implode("\x20", $options['cspConnectAllowed']);
     $importmap = json_encode(['imports' => new \stdClass]);
     $importHash = 'sha256-' . base64_encode(hash('sha256', $importmap, true));
-    header("Content-Security-Policy: default-src 'none'; img-src 'self' blob:; style-src 'self';"
-            . " script-src 'self' '$importHash'; frame-ancestors 'none'; upgrade-insecure-requests;" .
-            " base-uri 'self'; font-src 'none'; frame-src 'none'; form-action 'self';$conn;");
-    ob_start(function (string $string) use ($bottom): string {
-        return "$string$bottom\n";
-    });
+    header("Content-Security-Policy: default-src 'none'; img-src 'self' blob:; style-src 'self'"
+            . "; script-src 'self' '$importHash'; frame-ancestors 'none'; upgrade-insecure-requests"
+            . "; base-uri 'self'; font-src 'none'; frame-src 'none'; form-action 'self';$conn;");
+    //ob_start(function (string $string) use ($bottom): string {return "$string$bottom\n";});
+    ob_start(fn(string $string): string => "$string$bottom\n");
+    $origin = null;
     $baseColor = '';
     $links = array();
     $afterTitle = '[[Unknown]]';
-    $origin = null;
     if ($linkout = file_get_contents(__DIR__ . '/../sites.json')) {
         if ($linkout = json_decode($linkout, true)) {
             foreach ($linkout as $linky) {
@@ -93,28 +94,35 @@ function create_head3(string $title, array $user_options): void
                     $afterTitle = $linky['afterTitle'];
                     $origin = $linky['href'];
                 } else $favicon = "{$linky['favicon']}";
-                $out = ($isThis ? "data-o=$outline data-b=$back" : '');
+                $out = ($isThis ? "data-o=$outline\x20data-b=$back" : '');
                 $links[] = "<antnav-option $out><a href='{$linky['href']}'><img src='$favicon' alt"
                         . "='$alt' width={$linky['w']} height={$linky['h']}></a></antnav-option>";
             }
         }
     }
-    $bgColor = '#0073a6';
-    $borderColor = '#00a8f3';
-    if (array_key_exists('borderColor', $options)
-            && array_key_exists('backColor', $options)
-            && preg_match('/^(#?[a-fA-F0-9]{6}),(#?[a-fA-F0-9]{6})$/D',
-                    "{$options['borderColor']},{$options['backColor']}",
-                    $matches)) {
-        [, $borderColor, $bgColor] = $matches;
+    if (gmdate('m') === '10') {
+        $bgColor = '#a66d01';
+        $borderColor = '#f69b14';
+    } elseif (gmdate('m') === '12') {
+        $bgColor = '#f0f0f0';
+        $borderColor = '#fefefe';
+    } else {
+        $bgColor = '#0073a6';
+        $borderColor = '#00a8f3';
+        if (array_key_exists('borderColor', $options)
+                && array_key_exists('backColor', $options)
+                && preg_match('/^(#?[a-fA-F0-9]{6}),(#?[a-fA-F0-9]{6})$/D',
+                        "{$options['borderColor']},{$options['backColor']}",
+                        $matches)) [, $borderColor, $bgColor] = $matches;
     }
     $title = htmlspecialchars12("$title ($afterTitle)");
     $base = !empty($options['base']) ? "<base href=\"{$options['base']}\">" : '<!--base/-->';
-    echo "<!DOCTYPE html><html lang=\"{$options['lang']}\" data-p=$borderColor data-s=$bgColor>" .
+    echo "<!DOCTYPE html><html lang=\"{$options['lang']}\" data-line=$borderColor data-bg=$bgColor>" .
             "<meta charset=UTF-8><title>$title</title>$base\n<script type=importmap>$importmap" .
             "</script><script type=module src=/require/JSONScript.js></script>\n"
             . "<meta name=viewport content='width=device-width,initial-scale=1'>";
-    foreach (['/require/header3/ANTStylesheet.css', '/require/Nav.css'] as $stylelink)
+    /** @noinspection PhpForeachOverSingleElementArrayLiteralInspection */
+    foreach (['/require/header3/ANTStylesheet.css'] as $stylelink)
         echo "\n<link href=$stylelink rel=stylesheet>";
 
     $night = (int)(bool)$options['nightLightOverride'];
@@ -146,14 +154,11 @@ function create_head3(string $title, array $user_options): void
             $canonical = \Uri\WhatWg\Url::parse($canonical, new \Uri\WhatWg\Url($origin))->toAsciiString();
             echo "\n<link href='$canonical' rel=canonical>";
         }
-    } else {
-        echo '<!-- failure to set canonical, origin not available -->';
     }
-
     $class = '"' . htmlspecialchars12(implode("\x20", $options['class'] ?? array())) . '"';
 
     /** @noinspection HtmlUnknownTarget */
-    echo "\n<script src=/require/head2/domContentLoadedPromise.js></script>\n<body class=$class>";
+    echo "\n<script src=/require/header3/domContentLoadedPromise.js></script>\n<body class=$class>";
     echo "<nav class=headernav $baseColor><div>\n" . implode('', $links) . "\n</div></nav>";
     if ($linkarrays = $options['linkarrays'] ?? array(['text' => 'ANTRequest.nl', 'href' => 'https://antrequest.nl/'])) {
         echo "<nav class=breadcrumbs-list><div><ol>";

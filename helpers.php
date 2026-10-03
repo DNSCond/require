@@ -1,9 +1,4 @@
 <?php namespace Helpers;
-function sha256(string $string): string
-{
-    return hash('sha256', "$string");
-}
-
 function cbyte($num): string
 {
     $x = array("bytes", "KB", "MB", "GB", "TB");
@@ -21,8 +16,8 @@ function cbyte($num): string
 function htmlspecialchars12(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
-    //$html = str_replace('"', '&quot;', str_replace('>', '&gt;',
-    //str_replace('<', '&lt;', str_replace('\'', '&#39;',
+    //$html = str_replace('"', '&quot;', str_replace('>',
+    //'&gt;',str_replace('<', '&lt;', str_replace('\'', '&#39;',
     //str_replace('&', '&amp;', "$value"))))); return ($html);
 }
 
@@ -47,6 +42,18 @@ function normalize_newlines(string $string): string
     return str_replace("\r", "\n", str_replace("\r\n", "\n", "$string"));
 }
 
+function toDataSet(array $array): string
+{
+    $result = array();
+    foreach ($array as $key => $item) {
+        if (preg_match('/^[a-zA-Z0-9]+$/D', $key)) {
+            $val = htmlspecialchars12($item);
+            $result[] = "data-$key='$val'";
+        }
+    }
+    return implode("\x20", $result);
+}
+
 namespace Helpers\Mime;
 
 function sort_mimetypes(): array
@@ -54,6 +61,7 @@ function sort_mimetypes(): array
     if (!array_key_exists('HTTP_ACCEPT', $_SERVER)) {
         return array();
     }
+    /** @noinspection PhpPipeOperatorCanBeUsedInspection */
     $acceptableTypes = array_map('trim', explode(',', strtolower("{$_SERVER['HTTP_ACCEPT']}")));
     usort($acceptableTypes, function ($a, $b) use ($acceptableTypes) {
         $qA = getQualityFactor($a, $acceptableTypes);
@@ -61,7 +69,7 @@ function sort_mimetypes(): array
         return $qB <=> $qA;
     });
     return array_map(function ($item) {
-        return preg_replace('/;.+/', '', "$item");
+        return preg_replace(' /;.+/', '', "$item");
     }, $acceptableTypes);
 }
 
@@ -84,7 +92,7 @@ function get_accept_mimetype(array $mimeTypes, bool $Strict_exact_match = false)
     foreach ($acceptableTypes as $acceptableType) {
         if (in_array($acceptableType, $mimeTypes)) {
             return $acceptableType;
-        } else if ($acceptableType === '*/*' && !$Strict_exact_match) {
+        } else if ($acceptableType === ' */*' && !$Strict_exact_match) {
             return $mimeTypes[0];
         }
         if (!$Strict_exact_match)
@@ -115,6 +123,7 @@ namespace Helpers\Base64Url;
 
 function base64UrlEncode(string $data): string
 {
+    /** @noinspection PhpPipeOperatorCanBeUsedInspection */
     return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
 }
 

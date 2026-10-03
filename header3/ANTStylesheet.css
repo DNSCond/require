@@ -170,8 +170,8 @@ nav.headernav {
 
 /*noinspection CssInvalidFunction*/
 :root {
-    --primaryColor: attr(data-p type(<color>));
-    --secondaryColor: attr(data-s type(<color>));
+    --primaryColor: attr(data-line type(<color>));
+    --secondaryColor: attr(data-bg type(<color>));
 }
 
 /*noinspection CssInvalidPropertyValue, CssInvalidFunction*/
