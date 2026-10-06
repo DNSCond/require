@@ -100,13 +100,8 @@ function create_head3(string $title, array $user_options): void
             }
         }
     }
-    if (gmdate('m') === '10') {
-        $bgColor = '#a66d01';
-        $borderColor = '#f69b14';
-    } elseif (gmdate('m') === '12') {
-        $bgColor = '#f0f0f0';
-        $borderColor = '#fefefe';
-    } else {
+    // halloween colors: $bgColor = '#a66d01';$borderColor = '#f69b14';
+    // winter colors: $bgColor = '#f0f0f0';$borderColor = '#fefefe';
         $bgColor = '#0073a6';
         $borderColor = '#00a8f3';
         if (array_key_exists('borderColor', $options)
@@ -114,7 +109,6 @@ function create_head3(string $title, array $user_options): void
                 && preg_match('/^(#?[a-fA-F0-9]{6}),(#?[a-fA-F0-9]{6})$/D',
                         "{$options['borderColor']},{$options['backColor']}",
                         $matches)) [, $borderColor, $bgColor] = $matches;
-    }
     $title = htmlspecialchars12("$title ($afterTitle)");
     $base = !empty($options['base']) ? "<base href=\"{$options['base']}\">" : '<!--base/-->';
     echo "<!DOCTYPE html><html lang=\"{$options['lang']}\" data-line=$borderColor data-bg=$bgColor>" .
