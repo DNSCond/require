@@ -1,7 +1,6 @@
 <?php namespace ANTHeader;
 
 use function Helpers\htmlspecialchars12;
-use function Helpers\toDataSet;
 
 require_once __DIR__ . "/../helpers.php";
 function create_head3(string $title, array $user_options): void
@@ -71,8 +70,8 @@ function create_head3(string $title, array $user_options): void
     $importmap = json_encode(['imports' => new \stdClass]);
     $importHash = 'sha256-' . base64_encode(hash('sha256', $importmap, true));
     header("Content-Security-Policy: default-src 'none'; img-src 'self' blob:; style-src 'self'"
-            . "; script-src 'self' '$importHash'; frame-ancestors 'none'; upgrade-insecure-requests"
-            . "; base-uri 'self'; font-src 'none'; frame-src 'none'; form-action 'self';$conn;");
+            . "; script-src 'self' '$importHash'; frame-ancestors 'none'; base-uri 'self'; font-src "
+            . "'none'; frame-src 'none'; form-action 'self';$conn;");
     //ob_start(function (string $string) use ($bottom): string {return "$string$bottom\n";});
     ob_start(fn(string $string): string => "$string$bottom\n");
     $origin = null;
@@ -100,15 +99,15 @@ function create_head3(string $title, array $user_options): void
             }
         }
     }
-    // halloween colors: $bgColor = '#a66d01';$borderColor = '#f69b14';
-    // winter colors: $bgColor = '#f0f0f0';$borderColor = '#fefefe';
-        $bgColor = '#0073a6';
-        $borderColor = '#00a8f3';
-        if (array_key_exists('borderColor', $options)
-                && array_key_exists('backColor', $options)
-                && preg_match('/^(#?[a-fA-F0-9]{6}),(#?[a-fA-F0-9]{6})$/D',
-                        "{$options['borderColor']},{$options['backColor']}",
-                        $matches)) [, $borderColor, $bgColor] = $matches;
+    // halloween colors: $bgColor = '#a66d01'; $borderColor = '#f69b14';
+    // winter colors: $bgColor = '#f0f0f0'; $borderColor = '#fefefe';
+    $bgColor = '#0073a6';
+    $borderColor = '#00a8f3';
+    if (array_key_exists('borderColor', $options)
+            && array_key_exists('backColor', $options)
+            && preg_match('/^(#?[a-fA-F0-9]{6}),(#?[a-fA-F0-9]{6})$/D',
+                    "{$options['borderColor']},{$options['backColor']}",
+                    $matches)) [, $borderColor, $bgColor] = $matches;
     $title = htmlspecialchars12("$title ($afterTitle)");
     $base = !empty($options['base']) ? "<base href=\"{$options['base']}\">" : '<!--base/-->';
     echo "<!DOCTYPE html><html lang=\"{$options['lang']}\" data-line=$borderColor data-bg=$bgColor>" .
@@ -135,13 +134,19 @@ function create_head3(string $title, array $user_options): void
         echo "\n<meta name=description content='$desc'>";
     }
 
+    foreach ($options['linktags'] as $linktag) {
+        $rel = htmlspecialchars12($linktag[0]);
+        $ref = htmlspecialchars12($linktag[1]);
+        echo "\n<link href='$ref' rel='$rel'>";
+    }
+
     foreach ($options['metatags'] as $metatag) {
         if (is_null($metatag)) continue;
         $name = htmlspecialchars12($metatag[0]);
         $cont = htmlspecialchars12($metatag[1]);
         echo "\n<meta name='$name' content='$cont'>";
     }
-    echo "<meta name=theme-color content=$bgColor>"; // $borderColor>
+    echo "<meta name=theme-color content=$bgColor>";
     if ($origin) {
         if ($canonical = getFrom($user_options, 'canonical')) {
             /** @noinspection PhpFullyQualifiedNameUsageInspection, PhpUnhandledExceptionInspection */
@@ -149,6 +154,7 @@ function create_head3(string $title, array $user_options): void
             echo "\n<link href='$canonical' rel=canonical>";
         }
     }
+
     $class = '"' . htmlspecialchars12(implode("\x20", $options['class'] ?? array())) . '"';
 
     /** @noinspection HtmlUnknownTarget */
