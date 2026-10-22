@@ -32,13 +32,14 @@ function create_head3(string $title, array $user_options): void
     ob_start();
     $ventHref = '/';
     $ventStatus_VentOn = false;
-    $bottom = "<div class=bottom-divs>";
     if (is_string($options['ventHref'])) {
         $ventHref = $options['ventHref'];
         $ventStatus_VentOn = true;
     }
+    $noVent = $options['noVent'];
+    $bottom = "<div class='bottom-divs$noVent'>";
     $ventStatus_VentOn = $ventStatus_VentOn || gmdate('m') === '12';
-    if (!$options['noVent']): ?>
+    if (!$noVent): ?>
         <div class=empty>
         <div></div>
         <div>
@@ -65,8 +66,9 @@ function create_head3(string $title, array $user_options): void
     $bottom = $bottom . preg_replace('/\\s+/', ' ', ob_get_clean());
     $bottom = str_replace('> <', "><", $bottom);
     $conn = "\x20connect-src\x20";
-    if (is_array($options['cspConnectAllowed']))
+    if (is_array($options['cspConnectAllowed'])) {
         $conn .= implode("\x20", $options['cspConnectAllowed']);
+    } else $conn = "";
     $importmap = json_encode(['imports' => new \stdClass]);
     $importHash = 'sha256-' . base64_encode(hash('sha256', $importmap, true));
     header("Content-Security-Policy: default-src 'none'; img-src 'self' blob:; style-src 'self'"
