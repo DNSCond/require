@@ -86,7 +86,7 @@ nav.headernav {
     }
 
     /*noinspection CssInvalidFunction*/
-    --base-color: attr(data-base-color type(< color >));
+    --base-color: attr(data-base-color type(<color>));
     border-bottom: 4px solid var(--base-color, #00a8f3);
 }
 
@@ -170,8 +170,8 @@ nav.headernav {
 
 /*noinspection CssInvalidFunction*/
 :root {
-    --primaryColor: attr(data-line type(< color >));
-    --secondaryColor: attr(data-bg type(< color >));
+    --primaryColor: attr(data-line type(<color>));
+    --secondaryColor: attr(data-bg type(<color>));
 }
 
 /*noinspection CssInvalidPropertyValue, CssInvalidFunction*/
@@ -209,8 +209,8 @@ nav.headernav {
 
 /*noinspection CssInvalidFunction,CssInvalidPropertyValue*/
 antnav-option {
-    border-color: attr(data-o type(< color >));
-    background-color: attr(data-b type(< color >));
+    border-color: attr(data-o type(<color>));
+    background-color: attr(data-b type(<color>));
 }
 
 .sans-serif, .sans-serif * {

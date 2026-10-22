@@ -36,7 +36,7 @@ function create_head3(string $title, array $user_options): void
         $ventHref = $options['ventHref'];
         $ventStatus_VentOn = true;
     }
-    $noVent = $options['noVent'];
+    $noVent = (bool)$options['noVent'];
     $bottom = "<div class='bottom-divs$noVent'>";
     $ventStatus_VentOn = $ventStatus_VentOn || gmdate('m') === '12';
     if (!$noVent): ?>
