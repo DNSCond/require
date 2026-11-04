@@ -1,7 +1,7 @@
 <?php namespace Helpers;
 function cbyte($num): string
 {
-    $x = array("bytes", "KB", "MB", "GB", "TB");
+    $x = array("bytes", "KiB", "MiB", "GiB", "TiB");
     $i = 0;
     while ($num >= 1024) {
         $num = $num / 1024;
@@ -10,15 +10,12 @@ function cbyte($num): string
             break;
         }
     }
-    return round($num, 4) . " $x[$i]";
+    return round($num, 4) . "\x20$x[$i]";
 }
 
 function htmlspecialchars12(string $value): string
 {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5);
-    //$html = str_replace('"', '&quot;', str_replace('>',
-    //'&gt;',str_replace('<', '&lt;', str_replace('\'', '&#39;',
-    //str_replace('&', '&amp;', "$value"))))); return ($html);
 }
 
 function json_fromArray(mixed $json, bool|int $JSON_PRETTY_PRINT = true): false|string
@@ -45,9 +42,9 @@ function normalize_newlines(string $string): string
 function toDataSet(array $array): string
 {
     $result = array();
-    foreach ($array as $key => $item) {
-        if (preg_match('/^[a-zA-Z0-9]+$/D', $key)) {
-            $val = htmlspecialchars12($item);
+    foreach ($array as $key_ => $item) {
+        if (preg_match('/^[a-zA-Z0-9\\-]+$/D', $key = "$key_")) {
+            $val = htmlspecialchars12("$item");
             $result[] = "data-$key='$val'";
         }
     }
