@@ -33,8 +33,6 @@ body {
     background-color: var(--bgColor);
 }
 
-/*nav.main.nav-home {border-bottom-color: var(--borderColor);}*/
-
 .divs {
     margin: 1em auto auto;
     color: var(--textColor);
