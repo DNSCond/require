@@ -51,6 +51,43 @@ function toDataSet(array $array): string
     return implode("\x20", $result);
 }
 
+namespace Helpers\Getters;
+
+function readJSON(string $path): mixed
+{
+    $file = file_get_contents($path);
+    if (is_string($file)) return json_decode($file, true);
+    return null;
+}
+
+function isPresent(array $current, array $properties): bool
+{
+    /** @noinspection DuplicatedCode */
+    foreach ($properties as $property) {
+        if (!is_array($current)) return false;
+        elseif ((null) === ($property)) return false;
+        if (!is_string($property)) return false;
+        if (array_key_exists($property, $current)) {
+            $current = $current[$property];
+        } else return false;
+    }
+    return true;
+}
+
+function getThingOrNull(array $current, array $properties): mixed
+{
+    /** @noinspection DuplicatedCode */
+    foreach ($properties as $property) {
+        if (!is_array($current)) return null;
+        elseif ((null) === ($property)) return null;
+        if (!is_string($property)) return null;
+        if (array_key_exists($property, $current)) {
+            $current = $current[$property];
+        } else return null;
+    }
+    return $current;
+}
+
 namespace Helpers\Mime;
 
 function sort_mimetypes(): array
