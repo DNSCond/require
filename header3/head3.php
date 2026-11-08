@@ -12,8 +12,8 @@ function create_head3(string $title, array $user_options): void
             'lang' => getFrom($user_options, 'lang', 'en'),
             'ventHref' => getFrom($user_options, 'ventHref', false),
             'linkarrays' => getFrom($user_options, 'bread', array()),
-            'borderColor' => getFrom($user_options, 'borderColor', '#00a8f3'),
-            'backColor' => getFrom($user_options, 'backColor', '#0073a6'),
+            'borderColor' => getFrom($user_options, 'borderColor'),
+            'backColor' => getFrom($user_options, 'backColor'),
             'stylelinks' => getFrom($user_options, 'stylelinks', array()),
             'metatags' => getFrom($user_options, 'metatags', array()),
             'linktags' => getFrom($user_options, 'linktags', array()),
@@ -80,42 +80,45 @@ function create_head3(string $title, array $user_options): void
     $baseColor = '';
     $links = array();
     $afterTitle = '[[Unknown]]';
+    // halloween colors: $bgColor = '#a66d01'; $borderColor = '#f69b14';
+    // winter colors: $bgColor = '#f0f0f0'; $borderColor = '#fefefe';
+    $bgColor = '#f073a6';
+    $borderColor = '#f0a8f3';
     if ($linkout = file_get_contents(__DIR__ . '/../sites.json')) {
         if ($linkout = json_decode($linkout, true)) {
             foreach ($linkout as $linky) {
                 $alt = htmlspecialchars12($linky['title'] ?? '');
-                $outline = $linky['primColor'];
-                $back = $linky['backgColor'];
+                $out = '';
                 if (is_string($options['siteOverride'])) {
                     $isThis = $options['siteOverride'] === $linky['href'];
                 } else $isThis = $linky['this'];
                 if ($isThis) {
                     $favicon = $iconPath;
+                    $back = $linky['backgColor'];
+                    $outline = $linky['primColor'];
                     $baseColor = "data-base-color=$outline";
                     $afterTitle = $linky['afterTitle'];
                     $origin = $linky['href'];
+                    $borderColor = $outline;
+                    $bgColor = $back;
+                    $iconBG = array_key_exists('iconBG', $linky) ? $linky['iconBG'] : $back;
+                    $out = "data-o=$outline\x20data-b=$iconBG";
                 } else $favicon = "{$linky['favicon']}";
-                $out = ($isThis ? "data-o=$outline\x20data-b=$back" : '');
                 $links[] = "<antnav-option $out><a href='{$linky['href']}'><img src='$favicon' alt"
                         . "='$alt' width={$linky['w']} height={$linky['h']}></a></antnav-option>";
             }
         }
     }
-    // halloween colors: $bgColor = '#a66d01'; $borderColor = '#f69b14';
-    // winter colors: $bgColor = '#f0f0f0'; $borderColor = '#fefefe';
-    $bgColor = '#0073a6';
-    $borderColor = '#00a8f3';
-    if (array_key_exists('borderColor', $options)
-            && array_key_exists('backColor', $options)
+    if (is_string($options['borderColor']) && is_string($options['backColor'])
             && preg_match('/^(#?[a-fA-F0-9]{6}),(#?[a-fA-F0-9]{6})$/D',
                     "{$options['borderColor']},{$options['backColor']}",
                     $matches)) [, $borderColor, $bgColor] = $matches;
     $title = htmlspecialchars12("$title ($afterTitle)");
     $base = !empty($options['base']) ? "<base href=\"{$options['base']}\">" : '<!--base/-->';
-    echo "<!DOCTYPE html><html lang=\"{$options['lang']}\" data-line=$borderColor data-bg=$bgColor>" .
-            "<meta charset=UTF-8><title>$title</title>$base\n<script type=importmap>$importmap" .
-            "</script><script type=module src=/require/JSONScript.js></script>\n"
-            . "<meta name=viewport content='width=device-width,initial-scale=1'>";
+    echo "<!DOCTYPE html><html lang='{$options['lang']}' data-line=$borderColor data-bg=$bgColor" .
+            "><meta charset=UTF-8><title>$title</title>$base\n<script type=importmap>$importmap" .
+            "</script><script type=module src=/require/JSONScript.js></script>\n<meta name="
+            . "viewport content='width=device-width,initial-scale=1'>";
     /** @noinspection PhpForeachOverSingleElementArrayLiteralInspection */
     foreach (['/require/header3/ANTStylesheet.css'] as $stylelink)
         echo "\n<link href=$stylelink rel=stylesheet>";
