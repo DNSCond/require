@@ -47,7 +47,7 @@ body {
 }
 
 button, input, textarea, html, select, option {
-    font-family: monospace;
+    font-family: monospace, monospace;
 }
 
 nav.headernav {
