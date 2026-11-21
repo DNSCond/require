@@ -46,8 +46,14 @@ body {
     }
 }
 
-button, input, textarea, html, select, option {
-    font-family: monospace, monospace;
+button, input, textarea, body, select, option {
+    font-family: monospace;
+}
+
+body.monospaced-size-hack {
+    button, input, textarea, &, select, option {
+        font-family: monospace, monospace;
+    }
 }
 
 nav.headernav {
