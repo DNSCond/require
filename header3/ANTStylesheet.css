@@ -1,5 +1,3 @@
-/* to create NightLightStyles.css simply remove all @media (prefers-color-scheme: dark) */
-
 :root {
     --primaryColor: #00a8f3;
     --secondaryColor: #0073a6;
@@ -21,7 +19,7 @@ a:active {
 
 :root {
     --borderColor: var(--primaryColor);
-    --bgColor: var(--secondaryColor)
+    --bgColor: var(--secondaryColor);
 }
 
 body {
@@ -34,11 +32,11 @@ body {
 }
 
 .divs {
-    margin: 1em auto auto;
+    margin: 1rem auto auto;
     color: var(--textColor);
     background-color: var(--backColor);
     box-sizing: border-box;
-    padding: 0.7em;
+    padding: 0.7rem;
     width: 88%;
 
     > h1:first-child, > h2:first-child, > h3:first-child, > h4:first-child, > h5:first-child, > h6:first-child {
@@ -60,7 +58,7 @@ nav.headernav {
     color: #424242;
     background-color: currentColor;
     box-sizing: content-box;
-    height: calc(4.4em + 4px);
+    height: calc(4.4rem + 4px);
 
     > div {
         display: flex;
@@ -77,14 +75,14 @@ nav.headernav {
         > antnav-option {
             border-width: 4px;
             border-style: solid;
-            padding: 0.2em;
-            width: 4em;
-            height: 4em;
+            padding: 0.2rem;
+            width: 4rem;
+            height: 4rem;
             border-bottom: none;
 
             > a > img {
-                width: 4em;
-                height: 4em;
+                width: 4rem;
+                height: 4rem;
             }
         }
     }
@@ -113,7 +111,7 @@ nav.headernav {
     ol {
         width: fit-content;
         margin: 0;
-        height: 2.5em;
+        height: 2.5rem;
         max-width: 88%;
         overflow-x: auto;
         column-gap: 1ch;
@@ -124,8 +122,6 @@ nav.headernav {
         flex-wrap: nowrap;
         align-items: center;
         list-style: none;
-        font-size: 0.9rem;
-        /*justify-content: flex-end;*/
 
         > li {
             display: flex;
@@ -141,15 +137,11 @@ nav.headernav {
                 }
             }
 
-            /* Separator pseudo-element */
-
             &:not(:last-child)::after {
                 content: ">";
                 margin: 0 0 0 0.5rem;
                 color: #888;
             }
-
-            /* Active page style */
 
             &[aria-current=page] {
                 color: #222;
