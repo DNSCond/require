@@ -58,7 +58,7 @@ nav.headernav {
     color: #424242;
     background-color: currentColor;
     box-sizing: content-box;
-    height: calc(4.4rem + 4px);
+    /*height: calc(4.4rem + 4px);*/
 
     > div {
         display: flex;
@@ -76,13 +76,13 @@ nav.headernav {
             border-width: 4px;
             border-style: solid;
             padding: 0.2rem;
-            width: 4rem;
-            height: 4rem;
+            /*width: 2rem;*/
+            /*height: 2rem;*/
             border-bottom: none;
 
             > a > img {
-                width: 4rem;
-                height: 4rem;
+                width: 3.5rem;
+                height: 3.5rem;
             }
         }
     }
@@ -111,7 +111,7 @@ nav.headernav {
     ol {
         width: fit-content;
         margin: 0;
-        height: 2.5rem;
+        height: 2rem;
         max-width: 88%;
         overflow-x: auto;
         column-gap: 1ch;
